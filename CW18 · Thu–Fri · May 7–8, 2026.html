@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CW18 · Thu–Fri · May 7–8, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf9f7;--ink:#1a1916;--muted:#8a8680;--rule:#d8d4ce;
+  --red:#c0392b;--amber:#c8820a;--teal:#2a7a6e;--blue:#2c5f8a;
+  --purple:#6b4fa0;--green:#3a7a3a;
+  --tag-bg:#efefed;--tag-ink:#5a5750;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;max-width:900px;margin:0 auto;padding:32px 36px 80px}
+
+/* ─── TOOLBAR ─── */
+#toolbar{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:#f0ede8;border:1px solid var(--rule);border-radius:7px;
+  padding:10px 14px;margin-bottom:28px;
+}
+.tb-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.tb-sep{width:1px;height:22px;background:var(--rule);margin:0 6px}
+.tb-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;
+  padding:4px 10px;border-radius:4px;border:1px solid var(--rule);
+  background:var(--bg);color:var(--ink);cursor:pointer;white-space:nowrap;
+  transition:background .12s,border-color .12s;
+}
+.tb-btn:hover{background:#e8e4de;border-color:#bbb}
+.tb-btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tb-btn.primary:hover{background:#333}
+.tb-btn.danger{border-color:#ddd;color:#999}
+.tb-btn.danger:hover{border-color:var(--red);color:var(--red);background:#fdf0ee}
+#edit-hint{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);margin-left:auto;display:none}
+#save-indicator{pointer-events:none}
+body.edit-mode #edit-hint{display:block}
+
+/* ─── DEFERRED PANEL ─── */
+#deferred-panel{
+  display:none;background:#fffbf0;border:1.5px solid #f0d898;
+  border-radius:8px;padding:16px 20px;margin-bottom:28px;
+}
+#deferred-panel.visible{display:block}
+.def-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+#deferred-list{list-style:none}
+.def-item{display:flex;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:1px solid #f0d898;font-size:13px}
+.def-item:last-child{border-bottom:none}
+.def-item-text{flex:1}
+.def-item-label{font-weight:500}
+.def-item-src{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:1px}
+.def-undo{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#bbb;cursor:pointer;padding:2px 6px;border:1px solid #e0d8c8;border-radius:3px;background:var(--bg);flex-shrink:0;margin-top:1px}
+.def-undo:hover{color:var(--red);border-color:var(--red)}
+
+/* ─── HEADER ─── */
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px}
+.week-label{font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:300;color:var(--muted);letter-spacing:-1px}
+.week-label em{font-family:'Libre Baskerville',serif;font-style:italic;color:var(--red);font-size:38px}
+.week-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em;margin-top:4px}
+.header-right{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8}
+
+/* ─── DAY SECTION ─── */
+.day-section{margin-bottom:56px}
+.day-heading{display:flex;align-items:baseline;gap:14px;margin-bottom:4px}
+.day-name{font-family:'Libre Baskerville',serif;font-size:36px;font-weight:700}
+.day-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);letter-spacing:.1em;text-transform:uppercase}
+.day-rule{border:none;border-top:1.5px solid var(--ink);margin-bottom:12px}
+.day-highlights{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.9;margin-bottom:20px}
+.hl-bold{font-weight:500;color:var(--ink)}
+
+/* ─── SECTION LABEL ─── */
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+/* ─── SCHEDULE ─── */
+.schedule{margin-bottom:32px}
+.sched-row{
+  display:flex;align-items:flex-start;padding:4px 4px 4px 0;
+  border-radius:5px;position:relative;transition:background .12s;
+}
+.sched-row:hover{background:#f3f1ee}
+.sched-row:hover .row-actions{opacity:1}
+.sched-row::before{
+  content:'';position:absolute;left:44px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,transparent 0%,var(--rule) 20%,var(--rule) 80%,transparent 100%);
+  pointer-events:none;
+}
+.sched-row:first-child::before{top:50%}
+.sched-row:last-child::before{bottom:50%}
+.sched-time{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);width:36px;min-width:36px;padding-top:4px;text-align:right;flex-shrink:0}
+.sched-dot-col{width:20px;min-width:20px;display:flex;justify-content:center;padding-top:8px;position:relative;z-index:1;flex-shrink:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bg);border:1.5px solid var(--muted);transition:all .2s}
+.dot.red{border-color:var(--red);background:var(--red)}
+.dot.amber{border-color:var(--amber);background:var(--amber)}
+.dot.teal{border-color:var(--teal);background:var(--teal)}
+.dot.blue{border-color:var(--blue);background:var(--blue)}
+.dot.green{border-color:var(--green);background:var(--green)}
+.dot.purple{border-color:var(--purple);background:var(--purple)}
+.sched-content{padding:0 4px 4px 10px;flex:1;min-width:0}
+.sched-title{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sched-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-top:1px}
+
+/* schedule states */
+.sched-row.is-done .sched-title{text-decoration:line-through;color:var(--muted);font-weight:400}
+.sched-row.is-done .dot{background:var(--teal)!important;border-color:var(--teal)!important}
+.sched-row.is-deferred .sched-title{color:var(--amber)}
+.sched-row.is-deferred .dot{background:var(--amber)!important;border-color:var(--amber)!important}
+.spill{display:none;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px}
+.is-done .spill-done{display:inline-block;background:#e0f5f0;color:var(--teal)}
+.is-deferred .spill-defer{display:inline-block;background:#fef3dc;color:var(--amber)}
+
+/* ─── TASKS ─── */
+.task-section{margin-bottom:24px}
+.task-sec-hdr{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.task-sec-icon{font-size:14px}
+.task-sec-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.task-list{list-style:none}
+.task-item{display:flex;align-items:flex-start;gap:9px;padding:3px 4px;border-radius:4px;transition:background .12s}
+.task-item:hover{background:#f3f1ee}
+.task-item:hover .row-actions{opacity:1}
+.task-check{width:15px;height:15px;min-width:15px;border-radius:50%;border:1.5px solid #c0bab3;margin-top:3px;cursor:pointer;transition:all .15s;background:var(--bg);position:relative;flex-shrink:0}
+.task-check.priority{border-color:var(--red)}
+.task-check.is-done{border-color:var(--teal);background:var(--teal)}
+.task-check.is-done::after{content:'';position:absolute;top:2px;left:3px;width:5px;height:7px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg)}
+.task-check.is-deferred{border-color:var(--amber);background:var(--amber)}
+.task-check.is-deferred::after{content:'⟳';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:white}
+.task-wrap{flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0}
+.task-label{font-size:13px;line-height:1.4;transition:all .15s}
+.task-label.priority{font-weight:600}
+.task-item.is-done .task-label{text-decoration:line-through;color:var(--muted);font-weight:400}
+.task-item.is-deferred .task-label{color:var(--amber)}
+
+/* ─── TAGS ─── */
+.tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;padding:1px 5px;border-radius:3px;white-space:nowrap;cursor:default}
+.tag-mgis{background:#dde8f5;color:var(--blue)}
+.tag-home{background:#fef0e0;color:#a06010}
+.tag-kids{background:#e8f5ea;color:#2a6e2a}
+.tag-med{background:#fce8e8;color:#a02828}
+.tag-routine{background:#f0edf8;color:var(--purple)}
+.tag-summer{background:#fff5d6;color:#8a6010}
+.tag-other{background:var(--tag-bg);color:var(--tag-ink)}
+.tag-finance{background:#e2f5e2;color:#2a6e2a}
+.tag-church{background:#fce8f5;color:#8a2870}
+
+/* ─── ROW ACTIONS ─── */
+.row-actions{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s;align-items:flex-start;padding-top:2px}
+.act-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.04em;padding:2px 6px;border-radius:3px;border:1px solid;cursor:pointer;background:var(--bg);transition:background .1s,color .1s;white-space:nowrap;line-height:1.7}
+.done-btn{border-color:var(--teal);color:var(--teal)}
+.done-btn:hover{background:var(--teal);color:white}
+.defer-btn{border-color:var(--amber);color:var(--amber)}
+.defer-btn:hover{background:var(--amber);color:white}
+.del-btn{border-color:#ddd;color:#bbb}
+.del-btn:hover{border-color:var(--red);color:var(--red);background:#fdf0ee}
+
+/* ─── EDIT MODE ─── */
+/* Edit-mode: editable fields */
+body.edit-mode .sched-title-text,
+body.edit-mode .sched-sub-text,
+body.edit-mode .task-label-text,
+body.edit-mode .day-name-text,
+body.edit-mode .day-meta-text,
+body.edit-mode .sched-time-text,
+body.edit-mode .header-stat{
+  border-bottom:1px dashed var(--amber);outline:none;cursor:text;min-width:20px;
+  border-radius:2px;padding:0 2px;
+}
+body.edit-mode .sched-title-text:focus,
+body.edit-mode .task-label-text:focus,
+body.edit-mode .sched-time-text:focus,
+body.edit-mode .sched-sub-text:focus,
+body.edit-mode .header-stat:focus{
+  background:#fffbf0;outline:none;
+}
+/* Edit-mode: show row actions always */
+body.edit-mode .row-actions{opacity:1}
+/* Edit-mode: tag click to change */
+body.edit-mode .tag{cursor:pointer;outline:1px dashed var(--amber)}
+
+/* ─── ADD BUTTONS (edit mode only) ─── */
+.add-row-btn,.add-task-btn,.add-section-btn{
+  display:none;font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:.08em;color:var(--amber);border:1px dashed var(--amber);
+  background:transparent;cursor:pointer;border-radius:4px;padding:3px 10px;
+  margin:4px 0;width:100%;text-align:left;
+}
+.add-row-btn:hover,.add-task-btn:hover,.add-section-btn:hover{background:#fffbf0}
+body.edit-mode .add-row-btn,
+body.edit-mode .add-task-btn,
+body.edit-mode .add-section-btn{display:block}
+
+/* ─── FOOTER ─── */
+.footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:flex-start}
+.footer-legend{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);line-height:2}
+.footer-legend span{margin-right:8px}
+.leg-bar{display:inline-block;width:3px;height:10px;border-radius:1px;vertical-align:middle;margin-right:3px}
+.footer-stamp{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);text-align:right}
+.day-divider{border:none;border-top:1px solid var(--rule);margin:44px 0}
+
+/* ─── MODAL (tag picker & add forms) ─── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg);border-radius:10px;padding:24px 28px;min-width:300px;max-width:460px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.modal h3{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:700;margin-bottom:14px}
+.modal label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;margin-top:12px}
+.modal input,.modal select,.modal textarea{
+  width:100%;padding:7px 10px;border:1px solid var(--rule);border-radius:5px;
+  font-family:'DM Sans',sans-serif;font-size:13px;background:white;color:var(--ink);
+}
+.modal textarea{height:60px;resize:vertical}
+.modal-btns{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+.modal-btns button{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;padding:6px 14px;border-radius:4px;cursor:pointer;border:1px solid}
+.modal-btns .btn-cancel{background:var(--bg);border-color:var(--rule);color:var(--muted)}
+.modal-btns .btn-save{background:var(--ink);border-color:var(--ink);color:white}
+.tag-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tag-option{cursor:pointer;padding:4px 10px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;border:1.5px solid transparent;transition:all .15s}
+.tag-option:hover,.tag-option.selected{border-color:var(--ink)}
+.dot-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.dot-option{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color .15s}
+.dot-option:hover,.dot-option.selected{border-color:var(--ink)}
+
+/* ─── WEATHER STRIP ─── */
+#weather-strip{
+  display:flex;align-items:stretch;gap:0;border:1px solid var(--rule);border-radius:7px;
+  overflow:hidden;margin-bottom:28px;font-family:'IBM Plex Mono',monospace;
+}
+.wx-now{
+  display:flex;align-items:center;gap:12px;padding:12px 18px;
+  background:#f0ede8;border-right:1px solid var(--rule);flex-shrink:0;
+}
+.wx-now-temp{font-size:26px;font-weight:300;color:var(--ink);letter-spacing:-1px}
+.wx-now-detail{font-size:10px;color:var(--muted);line-height:1.7;letter-spacing:.04em}
+.wx-now-detail strong{color:var(--ink);font-weight:500}
+.wx-icon{font-size:22px;flex-shrink:0}
+.wx-days{display:flex;flex:1;overflow:hidden}
+.wx-day{
+  flex:1;padding:10px 12px;border-right:1px solid var(--rule);text-align:center;
+  min-width:0;transition:background .12s;
+}
+.wx-day:last-child{border-right:none}
+.wx-day:hover{background:#f3f1ee}
+.wx-day-name{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.wx-day-icon{font-size:16px;margin:2px 0}
+.wx-day-hi{font-size:13px;font-weight:500;color:var(--ink)}
+.wx-day-lo{font-size:10px;color:var(--muted)}
+.wx-day-precip{font-size:9px;color:var(--blue);margin-top:2px}
+.wx-day.today{background:#fffbf0}
+.wx-day.today .wx-day-name{color:var(--amber);font-weight:500}
+
+/* ─── CHANGE FLAGS ─── */
+/* Items added/edited in this session get a marker */
+.changed-flag{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:.05em;padding:1px 5px;border-radius:3px;margin-left:4px;
+  vertical-align:middle;flex-shrink:0;
+}
+.flag-new{background:#e8f5ea;color:#2a7a2a;border:1px solid #b8e0b8}
+.flag-edited{background:#fff0d6;color:#8a6000;border:1px solid #f0d898}
+/* sidebar marker on rows */
+.sched-row.is-new{border-left:2px solid #2a7a2a;padding-left:2px}
+.sched-row.is-edited{border-left:2px solid var(--amber);padding-left:2px}
+.task-item.is-new{border-left:2px solid #2a7a2a;padding-left:2px}
+.task-item.is-edited{border-left:2px solid var(--amber);padding-left:2px}
+/* change legend in toolbar */
+#change-legend{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#change-legend span{display:flex;align-items:center;gap:3px}
+/* hide change stuff in print unless show-changes is on */
+
+/* ─── DATE BADGE ─── */
+.date-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.05em;padding:1px 6px;border-radius:3px;cursor:pointer;white-space:nowrap;border:1px solid var(--rule);background:var(--bg);color:var(--muted);transition:border-color .12s,color .12s;display:inline-block;vertical-align:middle}
+.date-badge:hover{border-color:var(--amber);color:var(--amber)}
+.date-badge.has-date{border-color:var(--blue);color:var(--blue);background:#f0f5fc}
+.date-badge.overdue{border-color:var(--red);color:var(--red);background:#fdf0ee;animation:pulse-red 1.8s ease-in-out infinite}
+.date-badge.due-today{border-color:var(--amber);color:var(--amber);background:#fffbf0}
+.date-badge.add-date-hint{opacity:.38;font-size:8.5px}
+@keyframes pulse-red{0%,100%{opacity:1}50%{opacity:.55}}
+.sched-row.overdue-row:not(.is-done){background:#fff8f7}
+.task-item.overdue-item:not(.is-done){background:#fff8f7}
+.sched-row.overdue-row:not(.is-done) .sched-title-text{color:var(--red)}
+.task-item.overdue-item:not(.is-done) .task-label-text{color:var(--red)}
+#overdue-banner{display:none;background:#fdf0ee;border:1.5px solid #f5c0b8;border-radius:8px;padding:12px 18px;margin-bottom:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);line-height:1.9}
+#overdue-banner.visible{display:block}
+/* ─── DAY HIDE/SHOW ─── */
+.day-toggle-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;padding:3px 10px;border-radius:4px;border:1px solid var(--rule);background:var(--bg);color:var(--muted);cursor:pointer;margin-left:12px;vertical-align:middle;transition:all .12s}
+.day-toggle-btn:hover{border-color:var(--ink);color:var(--ink)}
+.day-collapsed .day-body{display:none}
+.day-collapsed .day-toggle-btn{color:var(--amber);border-color:var(--amber)}
+.day-collapsed-summary{display:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);padding:4px 0 14px}
+.day-collapsed .day-collapsed-summary{display:block}
+/* ─── DATE PICKER MODAL ─── */
+.date-presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.date-preset{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer;transition:all .12s}
+.date-preset:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ─── PATCH PANEL ─── */
+#patch-panel{
+  margin-top:48px;border-top:1px solid var(--rule);padding-top:24px;
+}
+#patch-panel-inner{
+  background:#f5f3ef;border:1px solid var(--rule);border-radius:8px;padding:20px 24px;
+}
+.patch-header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  margin-bottom:14px;
+}
+.patch-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+}
+.patch-btns{display:flex;gap:6px;flex-wrap:wrap}
+.patch-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;
+  padding:4px 12px;border-radius:4px;border:1px solid var(--rule);
+  background:var(--bg);color:var(--ink);cursor:pointer;transition:all .12s;
+}
+.patch-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.patch-btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.patch-btn.primary:hover{background:#333}
+#patch-output{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;
+  width:100%;min-height:120px;max-height:320px;overflow-y:auto;
+  background:white;border:1px solid var(--rule);border-radius:5px;
+  padding:12px 14px;resize:vertical;color:var(--ink);
+  white-space:pre-wrap;word-break:break-all;
+}
+.patch-note{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);
+  margin-top:8px;line-height:1.7;
+}
+.patch-note strong{color:var(--ink)}
+.patch-import-area{margin-top:16px;border-top:1px solid var(--rule);padding-top:16px;display:none}
+.patch-import-area.open{display:block}
+#patch-import-input{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  width:100%;height:100px;padding:10px 12px;border:1px solid var(--rule);
+  border-radius:5px;background:white;color:var(--ink);resize:vertical;
+}
+
+/* ─── PASTE IMPORT ZONE ─── */
+#paste-zone-wrap{
+  margin-top:48px;border-top:1px solid var(--rule);padding-top:24px;
+}
+#paste-zone-inner{
+  background:#f5f3ef;border:1px solid var(--rule);border-radius:8px;padding:20px 24px;
+}
+.paste-header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  margin-bottom:14px;
+}
+.paste-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+}
+.paste-desc{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);
+  margin-bottom:12px;line-height:1.7;
+}
+.paste-desc strong{color:var(--ink)}
+#paste-raw{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;
+  width:100%;min-height:140px;max-height:360px;
+  background:white;border:1px solid var(--rule);border-radius:5px;
+  padding:12px 14px;resize:vertical;color:var(--ink);
+}
+#paste-raw:focus{outline:none;border-color:var(--amber)}
+#paste-preview{
+  margin-top:14px;display:none;
+}
+#paste-preview.visible{display:block}
+.preview-title{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+}
+.preview-list{list-style:none;margin:0;padding:0}
+.preview-item{
+  display:flex;align-items:flex-start;gap:10px;padding:5px 0;
+  border-bottom:1px solid var(--rule);font-size:12.5px;
+}
+.preview-item:last-child{border-bottom:none}
+.preview-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;
+  border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;
+}
+.badge-cal{background:#dde8f5;color:var(--blue)}
+.badge-task{background:#e8f5ea;color:#2a6e2a}
+.badge-skip{background:var(--tag-bg);color:var(--muted)}
+.preview-item-text{flex:1;line-height:1.4}
+.preview-item-sub{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:1px}
+.preview-item-target{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--amber);margin-left:4px}
+.preview-item input[type=checkbox]{cursor:pointer;margin-top:3px;flex-shrink:0}
+.paste-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.paste-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;
+  padding:5px 14px;border-radius:4px;border:1px solid var(--rule);
+  background:var(--bg);color:var(--ink);cursor:pointer;transition:all .12s;
+}
+.paste-btn:hover{background:var(--ink);color:var(--bg)}
+.paste-btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.paste-btn.primary:hover{background:#333}
+.paste-count{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+#paste-day-target{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 10px;
+  border:1px solid var(--rule);border-radius:4px;background:var(--bg);color:var(--ink);
+}
+
+/* ─── EDITABLE HIGHLIGHTS ─── */
+.day-highlights{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.9;margin-bottom:20px;position:relative;padding:8px 10px;border-radius:5px;transition:background .12s}
+.day-highlights .hl-edit-hint{position:absolute;top:4px;right:8px;font-size:9px;opacity:0;color:var(--amber);pointer-events:none;transition:opacity .15s;font-family:'IBM Plex Mono',monospace}
+.day-highlights:hover .hl-edit-hint{opacity:.7}
+body.edit-mode .day-highlights[id]{border:1px dashed var(--amber);cursor:text;background:#fffbf0}
+body.edit-mode .day-highlights[id] .hl-edit-hint{display:none}
+.day-highlights[contenteditable="true"]:focus{outline:none}
+/* ─── WEATHER REFRESH ─── */
+.wx-refresh-btn{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.04em;padding:2px 8px;border-radius:3px;border:1px solid var(--rule);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s;display:inline-block;margin-top:4px}
+.wx-refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.wx-updated{font-size:9px;color:var(--muted);opacity:.8}
+@media print{.wx-refresh-btn{display:none!important}}
+@media print{#paste-zone-wrap{display:none!important}}
+@media print{#patch-panel{display:none!important}}
+@media print{
+  .changed-flag{display:none}
+  body.show-changes .changed-flag{display:inline-block}
+  body.show-changes .sched-row.is-new,body.show-changes .sched-row.is-edited,
+  body.show-changes .task-item.is-new,body.show-changes .task-item.is-edited{border-left-width:2px}
+}
+
+/* ─── PRINT ─── */
+@media print{
+  #toolbar,#deferred-panel,.row-actions,.add-row-btn,.add-task-btn,.add-section-btn,
+  .modal-bg,.act-btn,.add-date-hint,.day-toggle-btn,#overdue-banner{display:none!important}
+  .day-collapsed .day-body{display:block!important}
+  .day-collapsed-summary{display:none!important}
+  body{padding:20px 24px;max-width:none;font-size:12px}
+  .sched-row:hover,.task-item:hover{background:transparent}
+  .week-label{font-size:28px}
+  .week-label em{font-size:32px}
+  .day-name{font-size:30px}
+  .sched-title{font-size:12px}
+  .task-label{font-size:12px}
+  a{color:inherit;text-decoration:none}
+  .day-section{page-break-inside:avoid}
+  #weather-strip{break-inside:avoid}
+  @page{margin:1.5cm;size:letter}
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <span class="tb-label">CW18</span>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" id="btn-edit" onclick="toggleEdit()">✏ Edit mode</button>
+  <button class="tb-btn" id="btn-add-day" onclick="openModal('modal-add-day')" style="display:none">＋ Add day</button>
+  <button class="tb-btn" id="btn-add-sched" onclick="openAddSched()" style="display:none">＋ Calendar item</button>
+  <button class="tb-btn" id="btn-add-task" onclick="openAddTask()" style="display:none">＋ Task</button>
+  <div class="tb-sep" id="sep2" style="display:none"></div>
+  <div class="tb-sep"></div>
+  <div id="change-legend">
+    <span><span style="display:inline-block;width:8px;height:8px;background:#2a7a2a;border-radius:1px"></span><span class="flag-new" style="display:inline-block">new</span></span>
+    <span><span style="display:inline-block;width:8px;height:8px;background:var(--amber);border-radius:1px"></span><span class="flag-edited" style="display:inline-block">edited</span></span>
+    <button class="tb-btn" id="btn-changes" onclick="toggleChanges()" title="Show/hide change markers on print">⊙ Changes: on</button>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn primary" onclick="window.print()">⎙ Print</button>
+  <span id="edit-hint">Click any text to edit · Click tags to change · Hover rows for actions</span>
+  <button class="tb-btn danger" onclick="clearSavedState()" style="margin-left:auto" title="Reset to original">⟲ Reset</button>
+  <span id="save-indicator" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);opacity:0;transition:opacity .4s;letter-spacing:.05em">✓ saved</span>
+</div>
+
+<!-- WEATHER STRIP -->
+<div id="weather-strip">
+  <div class="wx-now">
+    <div class="wx-icon" id="wx-now-icon">☁️</div>
+    <div>
+      <div class="wx-now-temp" id="wx-now-temp">56°</div>
+      <div class="wx-now-detail"><strong id="wx-condition">Mostly cloudy</strong><br><span id="wx-location">Eden Prairie, MN</span> &nbsp;·&nbsp; <span class="wx-updated" id="wx-updated">Updated 8:00 PM CT</span><br><button class="wx-refresh-btn" id="wx-refresh-btn" onclick="refreshWeather()">&#8635; Refresh</button></div>
+    </div>
+  </div>
+  <div class="wx-days">
+    <div class="wx-day today" id="wx-day-thu">
+      <div class="wx-day-name" id="wx-thu-name">Thu</div>
+      <div class="wx-day-icon" id="wx-thu-icon">☁️</div>
+      <div class="wx-day-hi" id="wx-thu-hi">58°</div>
+      <div class="wx-day-precip" id="wx-thu-prec">10%</div>
+    </div>
+    <div class="wx-day" id="wx-day-fri">
+      <div class="wx-day-name" id="wx-fri-name">Fri</div>
+      <div class="wx-day-icon" id="wx-fri-icon">🌤</div>
+      <div class="wx-day-hi" id="wx-fri-hi">71°</div>
+      <div class="wx-day-precip" id="wx-fri-prec">10%</div>
+    </div>
+    <div class="wx-day" id="wx-day-sat">
+      <div class="wx-day-name" id="wx-sat-name">Sat</div>
+      <div class="wx-day-icon" id="wx-sat-icon">🌤</div>
+      <div class="wx-day-hi" id="wx-sat-hi">63°</div>
+      <div class="wx-day-precip" id="wx-sat-prec">0%</div>
+    </div>
+    <div class="wx-day" id="wx-day-sun">
+      <div class="wx-day-name" id="wx-sun-name">Sun</div>
+      <div class="wx-day-icon" id="wx-sun-icon">🌦</div>
+      <div class="wx-day-hi" id="wx-sun-hi">61°</div>
+      <div class="wx-day-precip" id="wx-sun-prec">20%</div>
+    </div>
+    <div class="wx-day" id="wx-day-mon">
+      <div class="wx-day-name" id="wx-mon-name">Mon</div>
+      <div class="wx-day-icon" id="wx-mon-icon">🌤</div>
+      <div class="wx-day-hi" id="wx-mon-hi">64°</div>
+      <div class="wx-day-precip" id="wx-mon-prec">10%</div>
+    </div>
+  </div>
+</div>
+
+<!-- DEFERRED PANEL -->
+<div id="deferred-panel">
+  <div class="def-title">⟳ Deferred — coordinate &amp; reschedule</div>
+  <ul id="deferred-list"></ul>
+</div>
+
+<div id="dashboard-content">
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="week-label">CW18 · <em>Remainder</em></div>
+    <div class="week-sub">THU MAY 7 → FRI MAY 8 · 2026</div>
+  </div>
+  <div class="header-right" style="line-height:1.9">
+    <span class="header-stat" contenteditable="false">Eden Prairie, MN</span><br>
+    <span class="header-stat" contenteditable="false">80 tasks this week</span><br>
+    <span class="header-stat" contenteditable="false">Kyle &amp; family</span>
+  </div>
+</div>
+
+<!-- ═══════════════ THURSDAY ═══════════════ -->
+<div class="day-section" id="day-thu">
+  <div class="day-heading">
+    <div class="day-name"><span class="day-name-text" contenteditable="false">Thursday</span></div>
+    <div class="day-meta"><span class="day-meta-text" contenteditable="false">May 7, 2026 &middot; TODAY</span></div>
+    <button class="day-toggle-btn" onclick="toggleDay('day-thu')" id="toggle-day-thu">&#9662; hide</button>
+  </div>
+  <div class="day-collapsed-summary" id="summary-day-thu"></div>
+  <div class="day-body" id="body-day-thu">
+  <hr class="day-rule">
+  <di<div class="day-highlights" id="hl-day-thu" contenteditable="false" oninput="onHighlightEdit()" title="Enter edit mode to edit">🏊 Swim at 9:00 &amp; 9:15 &nbsp;·&nbsp; 🎹 Piano 4:00pm &nbsp;·&nbsp; 🚌 Bus 7:17am &nbsp;·&nbsp; 🪣 Gold Mulch drop-off all day &nbsp;·&nbsp; ⚠ FAFSA due today!<span class="hl-edit-hint">✎ edit</span></div>
+
+  <div class="section-label">Schedule</div>
+  <div class="schedule" id="thu-sched">
+
+    <div class="sched-row" data-label="Wake Up · Hailey Out · Saoirse Morning Routine" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🌅 Wake Up · Hailey Out · Saoirse Morning Routine</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Shower · Breakfast · Pills · Freya Morning" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">☕ Shower · Breakfast · Pills · Freya Morning</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse Bus #2302" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:17</span></div>
+      <div class="sched-dot-col"><div class="dot red" data-color="red"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🚌 Saoirse Bus #2302</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse – Eagle Heights" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:45</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🏫 Saoirse – Eagle Heights</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 2:15 PM</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Freya – Primrose School" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">8:00</span></div>
+      <div class="sched-dot-col"><div class="dot green" data-color="green"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🌸 Freya – Primrose School</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 6:00 PM</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Lochlann Swim – Foss 9:00–9:30" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">9:00</span></div>
+      <div class="sched-dot-col"><div class="dot teal" data-color="teal"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🏊 Lochlann Swim Class</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">Foss Swim · Chanhassen · 9:00–9:30</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Freya Swim – Foss 9:15–9:45" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">9:15</span></div>
+      <div class="sched-dot-col"><div class="dot teal" data-color="teal"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🏊 Freya Swim Class</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">Foss Swim · 9:15–9:45</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Lunch with Saoirse at School" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">11:00</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🍱 Lunch with Saoirse at School?</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">11:40–12:05 · tentative</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse – Eagle Zone After School" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">2:15</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🦅 Saoirse – Eagle Zone After School</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 6:00 PM</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Pick Up Saoirse (Eagle Zone)" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">3:00</span></div>
+      <div class="sched-dot-col"><div class="dot red" data-color="red"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🚗 Pick Up Saoirse (Eagle Zone)</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse Piano Lesson – Kramer's 4:00–4:30" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">4:00</span></div>
+      <div class="sched-dot-col"><div class="dot purple" data-color="purple"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🎹 Saoirse Piano Lesson</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">Kramer's School of Music · Eden Prairie · 4:00–4:30</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Pick Up Freya & Lochlann (Primrose)" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">5:00</span></div>
+      <div class="sched-dot-col"><div class="dot red" data-color="red"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🚗 Pick Up Freya &amp; Lochlann (Primrose)</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Prep Dinner & Clean Up" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">5:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🍳 Prep Dinner &amp; Clean Up</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 7:00 PM</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Dinner" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:00</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🍽 Dinner</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Bath? · Saoirse Evening Chores" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:30</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🛁 Bath? · Saoirse Evening Chores</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Freya Bedtime" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:00</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🌙 Freya Bedtime</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse Bedtime" data-day="Thu">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">8:00</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content">
+        <div class="sched-title"><span class="sched-title-text" contenteditable="false">🌙 Saoirse Bedtime</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+      </div>
+      <div class="row-actions">
+        <button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button>
+        <button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button>
+        <button class="act-btn del-btn" onclick="delRow(this)">✕</button>
+      </div>
+    </div>
+
+    <button class="add-row-btn" onclick="openAddSched('thu-sched')">＋ Add calendar item</button>
+  </div><!-- /thu-sched -->
+
+  <!-- THU TASK SECTIONS -->
+  <div class="task-section" id="thu-sec-priority">
+    <div class="task-sec-hdr"><span class="task-sec-icon">🔴</span><span class="task-sec-title">Priority / Time-Sensitive</span></div>
+    <ul class="task-list" id="thu-tasks-priority">
+      <li class="task-item" data-day="Thu"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Fill out 2026–27 FAFSA</span><span class="tag tag-mgis" onclick="openTagPicker(this)">MGIS</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Gold Mulch Drop-Off (all day 7am–7pm)</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Saoirse meds for testing</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Forms for new Lochlann classroom</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Freya finger nails</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Cecelia's 7th Birthday — Rainbow Play Systems (May 9, 5–8pm)</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('thu-tasks-priority','Thu')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">📅</span><span class="task-sec-title">Schedule / Appointments</span></div>
+    <ul class="task-list" id="thu-tasks-sched">
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Green Horizons lawn &amp; yard services</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Saoirse hair cut 💇🏼‍♀️</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Next Freya dentist apt?</span><span class="tag tag-med" onclick="openTagPicker(this)">Med</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Food / meal plan (inc. breakfasts)</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">--- Marci ---</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('thu-tasks-sched','Thu')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">☀️</span><span class="task-sec-title">Summer Planning</span></div>
+    <ul class="task-list" id="thu-tasks-summer">
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Spanish reading camp</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Cub Scouts planning</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Music lessons?</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Scout Camp – June 19–21</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">VBS – June 22–26</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Eagle Zone Reg for 26–27</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('thu-tasks-summer','Thu')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">∞</span><span class="task-sec-title">Daily Routines</span></div>
+    <ul class="task-list" id="thu-tasks-routine">
+      <li class="task-item" data-day="Thu"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Take pills</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Colitis log &amp; weight</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Kitchen &amp; dishes</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Laundry &amp; fold 🧺</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Diaper trash out 💩</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Prep house for dog at night 🐶</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Hailey dog food – check &amp; clean dispenser</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Thu"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Inbox zero 📥</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('thu-tasks-routine','Thu')">＋ Add task</button>
+  </div>
+
+  <button class="add-section-btn" onclick="openAddSection('day-thu')">＋ Add task section to Thursday</button>
+</div><!-- /day-body -->
+</div><!-- /day-thu -->
+
+<hr class="day-divider">
+
+<!-- ═══════════════ FRIDAY ═══════════════ -->
+<div class="day-section" id="day-fri">
+  <div class="day-heading">
+    <div class="day-name"><span class="day-name-text" contenteditable="false">Friday</span></div>
+    <div class="day-meta"><span class="day-meta-text" contenteditable="false">May 8, 2026</span></div>
+    <button class="day-toggle-btn" onclick="toggleDay('day-fri')" id="toggle-day-fri">&#9662; hide</button>
+  </div>
+  <div class="day-collapsed-summary" id="summary-day-fri"></div>
+  <div class="day-body" id="body-day-fri">
+  <hr class="day-rule">
+  <di<div class="day-highlights" id="hl-day-fri" contenteditable="false" oninput="onHighlightEdit()" title="Enter edit mode to edit">🚫 No School for Saoirse &nbsp;·&nbsp; 💉 Meghan pump programming &nbsp;·&nbsp; 🌸 Mother's Day weekend! &nbsp;·&nbsp; 🎁 Don't forget: Mother's Day book – front closet!<span class="hl-edit-hint">✎ edit</span></div>
+
+  <div class="section-label">Schedule</div>
+  <div class="schedule" id="fri-sched">
+
+    <div class="sched-row" data-label="Wake Up · Hailey Out · Morning Routine" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🌅 Wake Up · Hailey Out · Morning Routine</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Shower · Breakfast · Pills · Freya Morning" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">☕ Shower · Breakfast · Pills · Freya Morning</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse – NO SCHOOL TODAY" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:45</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content">
+        <div class="sched-title" style="color:var(--muted);text-decoration:line-through;font-weight:400"><span class="sched-title-text" contenteditable="false">🚫 Saoirse – NO SCHOOL TODAY</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>
+        <div class="sched-sub"><span class="sched-sub-text" contenteditable="false">Eagle Heights – closed</span></div>
+      </div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Freya – Primrose School" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">8:00</span></div>
+      <div class="sched-dot-col"><div class="dot green" data-color="green"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🌸 Freya – Primrose School</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div><div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 6:00 PM</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse – Eagle Zone After School (confirm – no school?)" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">2:15</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🦅 Saoirse – Eagle Zone After School</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div><div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 6:00 PM (confirm – no school?)</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Prep Dinner" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">3:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🍳 Prep Dinner</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Pick Up Freya & Lochlann (Primrose)" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">5:00</span></div>
+      <div class="sched-dot-col"><div class="dot red" data-color="red"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🚗 Pick Up Freya &amp; Lochlann (Primrose)</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Prep Dinner & Clean Up" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">5:00</span></div>
+      <div class="sched-dot-col"><div class="dot amber" data-color="amber"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🍳 Prep Dinner &amp; Clean Up</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div><div class="sched-sub"><span class="sched-sub-text" contenteditable="false">until 7:00 PM</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Dinner" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:00</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🍽 Dinner</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Bath? · Saoirse Evening Chores" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">6:30</span></div>
+      <div class="sched-dot-col"><div class="dot" data-color=""></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🛁 Bath? · Saoirse Evening Chores</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Freya Bedtime" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">7:00</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🌙 Freya Bedtime</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Saoirse Bedtime" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">8:00</span></div>
+      <div class="sched-dot-col"><div class="dot blue" data-color="blue"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🌙 Saoirse Bedtime</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <div class="sched-row" data-label="Mother's Day Book — Front Closet!" data-day="Fri">
+      <div class="sched-time"><span class="sched-time-text" contenteditable="false">8:15</span></div>
+      <div class="sched-dot-col"><div class="dot red" data-color="red"></div></div>
+      <div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="false">🎁 Mother's Day Book — Don't Forget! (Front Closet)</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div></div>
+      <div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>
+    </div>
+
+    <button class="add-row-btn" onclick="openAddSched('fri-sched')">＋ Add calendar item</button>
+  </div><!-- /fri-sched -->
+
+  <!-- FRI TASK SECTIONS -->
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">👩🏻‍⚕️</span><span class="task-sec-title">Meghan / Joint</span></div>
+    <ul class="task-list" id="fri-tasks-joint">
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Meghan pump programming (5/8)</span><span class="tag tag-med" onclick="openTagPicker(this)">Med</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">MGIS Academic Plan</span><span class="tag tag-mgis" onclick="openTagPicker(this)">MGIS</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Baptism planning</span><span class="tag tag-church" onclick="openTagPicker(this)">Church</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Driver's license renewals – Minnesota</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-joint','Fri')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">🌸</span><span class="task-sec-title">Mother's Day Prep</span></div>
+    <ul class="task-list" id="fri-tasks-mothers">
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Mother's Day 🎁 – get book from front closet!</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-mothers','Fri')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">💰</span><span class="task-sec-title">Finance</span></div>
+    <ul class="task-list" id="fri-tasks-finance">
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Set up budget app for next month</span><span class="tag tag-finance" onclick="openTagPicker(this)">Finance</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Prioritize credit card payoff order 💳</span><span class="tag tag-finance" onclick="openTagPicker(this)">Finance</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">FAFSA / Financial Aid / Loan Payments</span><span class="tag tag-finance" onclick="openTagPicker(this)">Finance</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Chase Ink / Sapphire / Reserve / Apple Card – set up auto pays</span><span class="tag tag-finance" onclick="openTagPicker(this)">Finance</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-finance','Fri')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">🏠</span><span class="task-sec-title">House &amp; Cars</span></div>
+    <ul class="task-list" id="fri-tasks-house">
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Outdoor front yard lights</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Laundry room sink fix</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Fix / clean vacuum</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Car wash membership</span><span class="tag tag-home" onclick="openTagPicker(this)">Home</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-house','Fri')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">📅</span><span class="task-sec-title">Still Scheduling</span></div>
+    <ul class="task-list" id="fri-tasks-sched">
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Dog grooming – Hailey 🐶</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Freya hair cut 💇🏼‍♀️</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Next jaw PT appt</span><span class="tag tag-med" onclick="openTagPicker(this)">Med</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">TRIA ortho follow-up / PT</span><span class="tag tag-med" onclick="openTagPicker(this)">Med</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">EHSI Spring Dance – Srta. Castañeda – May 28</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Saoirse field trip to Arb – May 21 (9:30–1pm)</span><span class="tag tag-kids" onclick="openTagPicker(this)">Kids</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">EP Preschool / ECFE for Freya – fall 2026</span><span class="tag tag-summer" onclick="openTagPicker(this)">Summer</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">New Kyle shoes 👟</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Call Mom and Dad 📞</span><span class="tag tag-other" onclick="openTagPicker(this)">Other</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">CM Credits 🗺️</span><span class="tag tag-mgis" onclick="openTagPicker(this)">MGIS</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-sched','Fri')">＋ Add task</button>
+  </div>
+
+  <div class="task-section">
+    <div class="task-sec-hdr"><span class="task-sec-icon">∞</span><span class="task-sec-title">Daily Routines</span></div>
+    <ul class="task-list" id="fri-tasks-routine">
+      <li class="task-item" data-day="Fri"><div class="task-check priority" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label priority" contenteditable="false">Take pills</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Colitis log &amp; weight</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Kitchen &amp; dishes</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Diaper trash out 💩</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Prep house for dog at night 🐶</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+      <li class="task-item" data-day="Fri"><div class="task-check" onclick="taskToggle(this)"></div><div class="task-wrap"><span class="task-label-text task-label" contenteditable="false">Hailey dog food – check &amp; clean dispenser</span><span class="tag tag-routine" onclick="openTagPicker(this)">Routine</span></div><div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,'done')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,'defer')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div></li>
+    </ul>
+    <button class="add-task-btn" onclick="openAddTask('fri-tasks-routine','Fri')">＋ Add task</button>
+  </div>
+
+  <button class="add-section-btn" onclick="openAddSection('day-fri')">＋ Add task section to Friday</button>
+</div><!-- /day-body -->
+</div><!-- /day-fri -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-legend">
+    <div>CALENDAR: <span><span class="leg-bar" style="background:var(--amber)"></span>Morning</span> <span><span class="leg-bar" style="background:var(--blue)"></span>School</span> <span><span class="leg-bar" style="background:var(--teal)"></span>Swim</span> <span><span class="leg-bar" style="background:var(--purple)"></span>Piano</span> <span><span class="leg-bar" style="background:var(--red)"></span>Pickup</span></div>
+    <div style="margin-top:3px">TASKS: <span>Home</span> <span>Kids</span> <span>MGIS</span> <span>Med</span> <span>Routine</span> <span>Summer</span> <span>Finance</span></div>
+  </div>
+  <div class="footer-stamp">CW18 · EDEN PRAIRIE, MN<br>MAY 7–8, 2026</div>
+</div>
+
+</div><!-- /dashboard-content -->
+
+<!-- PASTE IMPORT ZONE -->
+<div id="paste-zone-wrap">
+  <div id="paste-zone-inner">
+    <div class="paste-header">
+      <span class="paste-title">&#9656; Paste &amp; import raw tasks</span>
+      <div style="display:flex;gap:6px">
+        <button class="paste-btn primary" onclick="parsePaste()">&#9654; Parse</button>
+        <button class="paste-btn" onclick="clearPaste()">&#215; Clear</button>
+      </div>
+    </div>
+    <div class="paste-desc">
+      Paste raw task or calendar data below — supports your Fantastical / Things / plain text format.
+      <strong>Calendar items</strong> start with <code>&bull;</code> and include a time range.
+      <strong>Tasks</strong> start with <code>&#9711;</code> or a dash and include a due date line.
+    </div>
+    <textarea id="paste-raw" placeholder="Paste raw data here...&#10;&#10;Examples:&#10;&bull; Saoirse Piano Lesson&#10;     5/7/26, 4:00 PM ~ 4:30 PM&#10;&#10;&#9711; Fill out FAFSA&#10;    Due Date : May 7, 2026    Finance &#x1f4b0;"></textarea>
+
+    <div id="paste-preview">
+      <div class="preview-title">Parsed items &mdash; uncheck any to skip, then choose destination &amp; add</div>
+      <ul class="preview-list" id="preview-list"></ul>
+      <div class="paste-actions">
+        <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">Add to day:</label>
+        <select id="paste-day-target">
+          <option value="thu">Thursday (May 7)</option>
+          <option value="fri">Friday (May 8)</option>
+        </select>
+        <button class="paste-btn primary" onclick="addParsedItems()" id="paste-add-btn">&#43; Add checked items</button>
+        <span class="paste-count" id="paste-count"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- PATCH EXPORT PANEL -->
+<div id="patch-panel">
+  <div id="patch-panel-inner">
+    <div class="patch-header">
+      <span class="patch-title">&#9654; Change patch &mdash; export &amp; import</span>
+      <div class="patch-btns">
+        <button class="patch-btn primary" onclick="generatePatch()">&#8635; Generate patch</button>
+        <button class="patch-btn" onclick="copyPatch()">&#9647; Copy</button>
+        <button class="patch-btn" onclick="toggleImport()">&#8659; Import patch</button>
+      </div>
+    </div>
+    <textarea id="patch-output" readonly placeholder="Click 'Generate patch' to export all your edits as a script you can paste into any copy of this dashboard..."></textarea>
+    <div class="patch-note">
+      <strong>How to use:</strong> Generate &rarr; Copy &rarr; open a fresh dashboard &rarr; open browser console (F12 / Cmd+Opt+J) &rarr; paste &rarr; Enter.
+      All your edits, new items, check-offs, dates, and tag changes will be replayed instantly.
+    </div>
+    <div class="patch-import-area" id="patch-import-area">
+      <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px">Paste patch script here to apply</label>
+      <textarea id="patch-import-input" placeholder="Paste patch script here..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="patch-btn primary" onclick="applyImportedPatch()">&#9654; Apply patch</button>
+        <button class="patch-btn" onclick="toggleImport()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Add Calendar Item -->
+<div class="modal-bg" id="modal-sched">
+  <div class="modal">
+    <h3>Add calendar item</h3>
+    <label>Time</label>
+    <input type="text" id="ns-time" placeholder="e.g. 10:30">
+    <label>Title</label>
+    <input type="text" id="ns-title" placeholder="e.g. 🏥 Doctor appt">
+    <label>Detail (optional)</label>
+    <input type="text" id="ns-sub" placeholder="e.g. Health Partners EP · 10:30–11:00">
+    <label>Dot color</label>
+    <div class="dot-grid" id="ns-dot-grid">
+      <div class="dot-option selected" style="background:var(--muted)" data-color="" title="gray"></div>
+      <div class="dot-option" style="background:var(--red)" data-color="red" title="red"></div>
+      <div class="dot-option" style="background:var(--amber)" data-color="amber" title="amber"></div>
+      <div class="dot-option" style="background:var(--teal)" data-color="teal" title="teal"></div>
+      <div class="dot-option" style="background:var(--blue)" data-color="blue" title="blue"></div>
+      <div class="dot-option" style="background:var(--green)" data-color="green" title="green"></div>
+      <div class="dot-option" style="background:var(--purple)" data-color="purple" title="purple"></div>
+    </div>
+    <input type="hidden" id="ns-target-sched">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-sched')">Cancel</button>
+      <button class="btn-save" onclick="saveSchedItem()">Add item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Task -->
+<div class="modal-bg" id="modal-task">
+  <div class="modal">
+    <h3>Add task</h3>
+    <label>Task name</label>
+    <input type="text" id="nt-label" placeholder="e.g. Call pharmacy">
+    <label>Tag</label>
+    <div class="tag-grid" id="nt-tag-grid">
+      <span class="tag tag-option tag-kids selected" data-tag="tag-kids" data-label="Kids">Kids</span>
+      <span class="tag tag-option tag-home" data-tag="tag-home" data-label="Home">Home</span>
+      <span class="tag tag-option tag-med" data-tag="tag-med" data-label="Med">Med</span>
+      <span class="tag tag-option tag-mgis" data-tag="tag-mgis" data-label="MGIS">MGIS</span>
+      <span class="tag tag-option tag-finance" data-tag="tag-finance" data-label="Finance">Finance</span>
+      <span class="tag tag-option tag-summer" data-tag="tag-summer" data-label="Summer">Summer</span>
+      <span class="tag tag-option tag-routine" data-tag="tag-routine" data-label="Routine">Routine</span>
+      <span class="tag tag-option tag-church" data-tag="tag-church" data-label="Church">Church</span>
+      <span class="tag tag-option tag-other" data-tag="tag-other" data-label="Other">Other</span>
+    </div>
+    <label style="margin-top:14px">Priority?</label>
+    <select id="nt-priority">
+      <option value="no">Normal</option>
+      <option value="yes">Priority (bold, red circle)</option>
+    </select>
+    <input type="hidden" id="nt-target-list">
+    <input type="hidden" id="nt-target-day">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-task')">Cancel</button>
+      <button class="btn-save" onclick="saveTask()">Add task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tag Picker -->
+<div class="modal-bg" id="modal-tag">
+  <div class="modal">
+    <h3>Change tag</h3>
+    <div class="tag-grid" id="tp-grid">
+      <span class="tag tag-option tag-kids" data-tag="tag-kids" data-label="Kids">Kids</span>
+      <span class="tag tag-option tag-home" data-tag="tag-home" data-label="Home">Home</span>
+      <span class="tag tag-option tag-med" data-tag="tag-med" data-label="Med">Med</span>
+      <span class="tag tag-option tag-mgis" data-tag="tag-mgis" data-label="MGIS">MGIS</span>
+      <span class="tag tag-option tag-finance" data-tag="tag-finance" data-label="Finance">Finance</span>
+      <span class="tag tag-option tag-summer" data-tag="tag-summer" data-label="Summer">Summer</span>
+      <span class="tag tag-option tag-routine" data-tag="tag-routine" data-label="Routine">Routine</span>
+      <span class="tag tag-option tag-church" data-tag="tag-church" data-label="Church">Church</span>
+      <span class="tag tag-option tag-other" data-tag="tag-other" data-label="Other">Other</span>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-tag')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Section -->
+<div class="modal-bg" id="modal-section">
+  <div class="modal">
+    <h3>Add task section</h3>
+    <label>Icon (emoji)</label>
+    <input type="text" id="nsec-icon" placeholder="e.g. 🏃 or ⚡" maxlength="4">
+    <label>Section title</label>
+    <input type="text" id="nsec-title" placeholder="e.g. Wellness">
+    <input type="hidden" id="nsec-target-day">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-section')">Cancel</button>
+      <button class="btn-save" onclick="saveSection()">Add section</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── STATE ── */
+var deferred = [];
+var editMode = false;
+var showChanges = true;
+var LS_KEY = 'cw18-v1';
+var _saveTimer = null;
+
+/* ── PERSISTENCE ── */
+function saveState() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function(){
+    try {
+      var colDays=[];
+      document.querySelectorAll('.day-section[data-collapsed="1"]').forEach(function(s){colDays.push(s.id);});
+      var state = {
+        content: document.getElementById('dashboard-content').innerHTML,
+        deferred: deferred.map(function(d){
+          return {label:d.label,day:d.day,type:d.type,id:d.el?d.el.getAttribute('data-id'):null};
+        }),
+        showChanges: showChanges,
+        collapsedDays: colDays,
+        ts: Date.now()
+      };
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+      flashSaved();
+    } catch(e){}
+  }, 500);
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    var state = JSON.parse(raw);
+    if (!state.content) return false;
+    document.getElementById('dashboard-content').innerHTML = state.content;
+    deferred = [];
+    (state.deferred||[]).forEach(function(d){
+      var el = d.id ? document.querySelector('[data-id="'+d.id+'"]') : null;
+      deferred.push({label:d.label,day:d.day,type:d.type,el:el});
+    });
+    showChanges = state.showChanges !== false;
+    document.body.classList.toggle('show-changes', showChanges);
+    var btn = document.getElementById('btn-changes');
+    if (btn) btn.textContent = '⊙ Changes: ' + (showChanges?'on':'off');
+    updatePanel();
+    reAttachListeners();
+    return true;
+  } catch(e) { return false; }
+}
+
+function reAttachListeners() {
+  document.querySelectorAll('.modal-bg').forEach(function(bg){
+    bg.addEventListener('click',function(e){ if(e.target===bg) bg.classList.remove('open'); });
+  });
+  ['#ns-dot-grid .dot-option','#nt-tag-grid .tag-option'].forEach(function(sel){
+    document.querySelectorAll(sel).forEach(function(opt){
+      opt.addEventListener('click',function(){
+        document.querySelectorAll(sel).forEach(function(o){o.classList.remove('selected');});
+        opt.classList.add('selected');
+      });
+    });
+  });
+}
+
+function flashSaved() {
+  var el = document.getElementById('save-indicator');
+  if (!el) return;
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.opacity='0'; }, 2000);
+}
+
+function clearSavedState() {
+  if (!confirm('Reset to original? All edits, check-offs, and additions will be lost.')) return;
+  try { localStorage.removeItem(LS_KEY); } catch(e){}
+  location.reload();
+}
+
+function assignIds() {
+  var n = 0;
+  document.querySelectorAll('.sched-row,.task-item').forEach(function(el){
+    if (!el.getAttribute('data-id')) el.setAttribute('data-id','r'+(++n));
+  });
+}
+
+/* ── EDIT MODE ── */
+function toggleEdit() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  var btn = document.getElementById('btn-edit');
+  btn.textContent = editMode ? '✓ Done editing' : '✏ Edit mode';
+  btn.className = editMode ? 'tb-btn primary' : 'tb-btn';
+  ['btn-add-day','btn-add-sched','btn-add-task','sep2'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.style.display = editMode ? 'inline-flex' : 'none';
+  });
+  /* toggle contenteditable on all editable spans */
+  document.querySelectorAll('.sched-title-text,.sched-sub-text,.task-label-text,.day-name-text,.day-meta-text,.sched-time-text,.header-stat').forEach(function(el){
+    el.contentEditable = editMode ? 'true' : 'false';
+  });
+  document.querySelectorAll('.day-highlights[id]').forEach(function(el){
+    el.contentEditable = editMode ? 'true' : 'false';
+    if(!editMode) saveState();
+  });
+  /* tags clickable in edit mode only */
+  if(!editMode){
+    document.querySelectorAll('.tag').forEach(function(t){ t.style.pointerEvents=''; });
+    document.querySelectorAll('.add-date-hint').forEach(function(h){h.remove();});
+  } else {
+    refreshDateAffordances();
+  }
+}
+
+/* ── DEFERRED PANEL ── */
+function updatePanel() {
+  var panel = document.getElementById('deferred-panel');
+  var list = document.getElementById('deferred-list');
+  if(!panel||!list) return;
+  if(!deferred.length){ panel.classList.remove('visible'); return; }
+  panel.classList.add('visible');
+  list.innerHTML='';
+  deferred.forEach(function(item,idx){
+    var li = document.createElement('li');
+    li.className='def-item';
+    li.innerHTML='<div class="def-item-text"><div class="def-item-label">'+item.label+'</div><div class="def-item-src">'+item.type+' · '+item.day+'</div></div><button class="def-undo" onclick="undoDefer('+idx+')">✕ undo</button>';
+    list.appendChild(li);
+  });
+}
+
+function undoDefer(idx) {
+  var item = deferred[idx];
+  if(item.el) {
+    if(item.type==='Calendar') item.el.classList.remove('is-deferred');
+    else {
+      item.el.classList.remove('is-deferred');
+      var c=item.el.querySelector('.task-check'); if(c) c.classList.remove('is-deferred');
+    }
+  }
+  deferred.splice(idx,1);
+  updatePanel();
+  saveState();
+}
+
+/* ── SCHEDULE ACTIONS ── */
+function schedAct(btn, action) {
+  var row = btn.closest('.sched-row');
+  var label = row.getAttribute('data-label') || row.querySelector('.sched-title-text').textContent;
+  var day = row.getAttribute('data-day');
+  if(action==='done') {
+    var was = row.classList.contains('is-done');
+    row.classList.remove('is-done','is-deferred');
+    deferred = deferred.filter(function(d){return d.el!==row;});
+    updatePanel();
+    if(!was){ row.classList.add('is-done'); row.classList.remove('overdue-row','overdue-item'); refreshOverdue(); }
+  } else {
+    var wasD = row.classList.contains('is-deferred');
+    row.classList.remove('is-done','is-deferred');
+    deferred = deferred.filter(function(d){return d.el!==row;});
+    if(!wasD){
+      row.classList.add('is-deferred');
+      deferred.push({label:label,day:day,type:'Calendar',el:row});
+      updatePanel();
+      document.getElementById('deferred-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+    } else { updatePanel(); }
+  }
+  saveState();
+}
+
+/* ── TASK ACTIONS ── */
+function taskToggle(circle) {
+  var item = circle.closest('.task-item');
+  var was = item.classList.contains('is-done');
+  item.classList.remove('is-done','is-deferred');
+  circle.classList.remove('is-done','is-deferred');
+  deferred = deferred.filter(function(d){return d.el!==item;});
+  updatePanel();
+  if(!was){ item.classList.add('is-done'); circle.classList.add('is-done'); item.classList.remove('overdue-item'); refreshOverdue(); }
+  saveState();
+}
+
+function taskAct(btn, action) {
+  var item = btn.closest('.task-item');
+  var circle = item.querySelector('.task-check');
+  var label = item.querySelector('.task-label-text') ? item.querySelector('.task-label-text').textContent.trim() : '';
+  var day = item.getAttribute('data-day');
+  item.classList.remove('is-done','is-deferred');
+  circle.classList.remove('is-done','is-deferred');
+  deferred = deferred.filter(function(d){return d.el!==item;});
+  if(action==='done'){ item.classList.add('is-done'); circle.classList.add('is-done'); updatePanel(); }
+  else {
+    item.classList.add('is-deferred'); circle.classList.add('is-deferred');
+    deferred.push({label:label,day:day,type:'Task',el:item});
+    updatePanel();
+    document.getElementById('deferred-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  saveState();
+}
+
+/* ── DELETE ROW ── */
+function delRow(btn) {
+  var row = btn.closest('.sched-row,.task-item');
+  deferred = deferred.filter(function(d){return d.el!==row;});
+  updatePanel();
+  row.remove();
+  saveState();
+}
+
+/* ── MODAL HELPERS ── */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(function(bg){
+  bg.addEventListener('click',function(e){ if(e.target===bg) bg.classList.remove('open'); });
+});
+
+/* ── ADD SCHED ITEM ── */
+function openAddSched(targetId) {
+  document.getElementById('ns-time').value='';
+  document.getElementById('ns-title').value='';
+  document.getElementById('ns-sub').value='';
+  document.getElementById('ns-target-sched').value=targetId||'';
+  document.querySelectorAll('#ns-dot-grid .dot-option').forEach(function(d,i){ d.classList.toggle('selected',i===0); });
+  openModal('modal-sched');
+  setTimeout(function(){ document.getElementById('ns-time').focus(); },100);
+}
+document.querySelectorAll('#ns-dot-grid .dot-option').forEach(function(opt){
+  opt.addEventListener('click',function(){
+    document.querySelectorAll('#ns-dot-grid .dot-option').forEach(function(o){o.classList.remove('selected');});
+    opt.classList.add('selected');
+  });
+});
+function saveSchedItem() {
+  var time = document.getElementById('ns-time').value.trim();
+  var title = document.getElementById('ns-title').value.trim();
+  var sub = document.getElementById('ns-sub').value.trim();
+  var targetId = document.getElementById('ns-target-sched').value;
+  var color = (document.querySelector('#ns-dot-grid .dot-option.selected')||{}).getAttribute('data-color')||'';
+  if(!title){ document.getElementById('ns-title').focus(); return; }
+  var row = buildSchedRow(time,title,sub,color,'');
+  var target = targetId ? document.getElementById(targetId) : document.getElementById('fri-sched');
+  var addBtn = target.querySelector('.add-row-btn');
+  if(addBtn) target.insertBefore(row,addBtn); else target.appendChild(row);
+  addChangeFlag(row,'new');
+  assignIds();
+  saveState();
+  closeModal('modal-sched');
+}
+function buildSchedRow(time,title,sub,color,day){
+  var li=document.createElement('div'); li.className='sched-row'; li.setAttribute('data-label',title); li.setAttribute('data-day',day||'');
+  li.innerHTML='<div class="sched-time"><span class="sched-time-text" contenteditable="'+editMode+'">'+time+'</span></div>'
+    +'<div class="sched-dot-col"><div class="dot'+(color?' '+color:'')+'" data-color="'+color+'"></div></div>'
+    +'<div class="sched-content"><div class="sched-title"><span class="sched-title-text" contenteditable="'+editMode+'">'+title+'</span><span class="spill spill-done">✓ done</span><span class="spill spill-defer">⟳ defer</span></div>'
+    +(sub?'<div class="sched-sub"><span class="sched-sub-text" contenteditable="'+editMode+'">'+sub+'</span></div>':'')
+    +'</div>'
+    +'<div class="row-actions"><button class="act-btn done-btn" onclick="schedAct(this,\'done\')">✓</button><button class="act-btn defer-btn" onclick="schedAct(this,\'defer\')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>';
+  return li;
+}
+
+/* ── ADD TASK ── */
+var _taskListTarget='', _taskDayTarget='';
+function openAddTask(listId, day) {
+  _taskListTarget=listId||'fri-tasks-sched'; _taskDayTarget=day||'Fri';
+  document.getElementById('nt-label').value='';
+  document.getElementById('nt-priority').value='no';
+  document.querySelector('#nt-tag-grid .tag-option.selected')&&document.querySelector('#nt-tag-grid .tag-option.selected').classList.remove('selected');
+  document.querySelector('#nt-tag-grid .tag-option').classList.add('selected');
+  openModal('modal-task');
+  setTimeout(function(){ document.getElementById('nt-label').focus(); },100);
+}
+document.querySelectorAll('#nt-tag-grid .tag-option').forEach(function(opt){
+  opt.addEventListener('click',function(){
+    document.querySelectorAll('#nt-tag-grid .tag-option').forEach(function(o){o.classList.remove('selected');});
+    opt.classList.add('selected');
+  });
+});
+function saveTask() {
+  var label=document.getElementById('nt-label').value.trim();
+  var isPriority=document.getElementById('nt-priority').value==='yes';
+  var selTag=document.querySelector('#nt-tag-grid .tag-option.selected');
+  var tagClass=selTag?selTag.getAttribute('data-tag'):'tag-other';
+  var tagLabel=selTag?selTag.getAttribute('data-label'):'Other';
+  if(!label){ document.getElementById('nt-label').focus(); return; }
+  var li=buildTaskItem(label,isPriority,tagClass,tagLabel,_taskDayTarget);
+  var list=document.getElementById(_taskListTarget);
+  var addBtn=list.parentElement.querySelector('.add-task-btn');
+  if(addBtn) list.parentElement.insertBefore(li,addBtn); else list.appendChild(li);
+  addChangeFlag(li,'new');
+  assignIds();
+  saveState();
+  closeModal('modal-task');
+}
+function buildTaskItem(label,isPriority,tagClass,tagLabel,day){
+  var li=document.createElement('li'); li.className='task-item'; li.setAttribute('data-day',day||'');
+  li.innerHTML='<div class="task-check'+(isPriority?' priority':'')+'" onclick="taskToggle(this)"></div>'
+    +'<div class="task-wrap"><span class="task-label-text task-label'+(isPriority?' priority':'')+'" contenteditable="'+editMode+'">'+label+'</span>'
+    +'<span class="tag '+tagClass+'" onclick="openTagPicker(this)">'+tagLabel+'</span></div>'
+    +'<div class="row-actions"><button class="act-btn done-btn" onclick="taskAct(this,\'done\')">✓</button><button class="act-btn defer-btn" onclick="taskAct(this,\'defer\')">⟳</button><button class="act-btn del-btn" onclick="delRow(this)">✕</button></div>';
+  return li;
+}
+
+/* ── TAG PICKER ── */
+var _tagTarget=null;
+function openTagPicker(tagEl){
+  if(!editMode) return;
+  _tagTarget=tagEl;
+  document.querySelectorAll('#tp-grid .tag-option').forEach(function(o){
+    o.classList.toggle('selected', o.getAttribute('data-tag')===tagEl.className.split(' ').find(function(c){return c.startsWith('tag-')&&c!=='tag';}));
+  });
+  openModal('modal-tag');
+}
+/* tag save handled in change-tracking section below */
+
+/* ── ADD SECTION ── */
+var _sectionDayTarget='';
+function openAddSection(dayId){
+  _sectionDayTarget=dayId;
+  document.getElementById('nsec-icon').value='';
+  document.getElementById('nsec-title').value='';
+  openModal('modal-section');
+  setTimeout(function(){ document.getElementById('nsec-icon').focus(); },100);
+}
+function saveSection(){
+  var icon=document.getElementById('nsec-icon').value.trim()||'•';
+  var title=document.getElementById('nsec-title').value.trim();
+  if(!title){ document.getElementById('nsec-title').focus(); return; }
+  var secId='sec-'+Date.now();
+  var listId='list-'+Date.now();
+  var div=document.createElement('div'); div.className='task-section'; div.id=secId;
+  div.innerHTML='<div class="task-sec-hdr"><span class="task-sec-icon">'+icon+'</span><span class="task-sec-title">'+title+'</span></div>'
+    +'<ul class="task-list" id="'+listId+'"></ul>'
+    +'<button class="add-task-btn" onclick="openAddTask(\''+listId+'\',\'\')" style="display:block">＋ Add task</button>';
+  var dayEl=document.getElementById(_sectionDayTarget);
+  var addSecBtn=dayEl.querySelector('.add-section-btn');
+  if(addSecBtn) dayEl.insertBefore(div,addSecBtn); else dayEl.appendChild(div);
+  assignIds();
+  saveState();
+  closeModal('modal-section');
+}
+
+/* ── CHANGE TRACKING ── */
+
+function toggleChanges(){
+  showChanges = !showChanges;
+  document.body.classList.toggle('show-changes', showChanges);
+  document.getElementById('btn-changes').textContent = '⊙ Changes: ' + (showChanges ? 'on' : 'off');
+  document.querySelectorAll('.changed-flag').forEach(function(f){
+    f.style.display = showChanges ? '' : 'none';
+  });
+  document.querySelectorAll('.sched-row.is-new,.sched-row.is-edited,.task-item.is-new,.task-item.is-edited').forEach(function(el){
+    el.style.borderLeft = showChanges ? '' : 'none';
+  });
+  saveState();
+}
+
+function addChangeFlag(el, type) {
+  /* el = sched-row or task-item; type = 'new' | 'edited' */
+  el.classList.add('is-'+type);
+  /* remove any existing flag in title/label */
+  el.querySelectorAll('.changed-flag').forEach(function(f){ f.remove(); });
+  var flag = document.createElement('span');
+  flag.className = 'changed-flag flag-'+type;
+  flag.textContent = type === 'new' ? '+ new' : '✎ edited';
+  if(!showChanges) flag.style.display='none';
+  var titleEl = el.querySelector('.sched-title-text,.task-label-text');
+  if(titleEl && titleEl.parentElement) titleEl.parentElement.appendChild(flag);
+}
+
+/* Watch contenteditable fields for changes and mark as edited */
+document.addEventListener('input', function(e){
+  var t = e.target;
+  if(!t.contentEditable || t.contentEditable==='false') return;
+  var row = t.closest('.sched-row,.task-item');
+  if(row && !row.classList.contains('is-new')){
+    addChangeFlag(row, 'edited');
+  }
+  saveState();
+});
+
+/* Tag picker marks item as edited */
+var _origTagPicker = openTagPicker;
+function openTagPicker(tagEl){
+  if(!editMode) return;
+  _tagTarget = tagEl;
+  document.querySelectorAll('#tp-grid .tag-option').forEach(function(o){
+    o.classList.toggle('selected', o.getAttribute('data-tag')===tagEl.className.split(' ').find(function(c){return c.startsWith('tag-')&&c!=='tag';}));
+  });
+  openModal('modal-tag');
+}
+/* After tag save, mark edited (wire into tp-grid click) */
+document.querySelectorAll('#tp-grid .tag-option').forEach(function(opt){
+  opt.addEventListener('click',function(){
+    if(!_tagTarget) return;
+    var row = _tagTarget.closest('.sched-row,.task-item');
+    _tagTarget.className='tag '+opt.getAttribute('data-tag');
+    _tagTarget.textContent=opt.getAttribute('data-label');
+    _tagTarget.setAttribute('onclick','openTagPicker(this)');
+    if(row && !row.classList.contains('is-new')) addChangeFlag(row,'edited');
+    saveState();
+    closeModal('modal-tag');
+  });
+});
+
+/* ── KEYBOARD SHORTCUTS ── */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') document.querySelectorAll('.modal-bg.open').forEach(function(m){m.classList.remove('open');});
+  if((e.ctrlKey||e.metaKey)&&e.key==='p'){ e.preventDefault(); window.print(); }
+});
+
+/* ── DAY TOGGLE ── */
+function toggleDay(dayId){
+  var sec=document.getElementById(dayId);
+  var body=document.getElementById('body-'+dayId);
+  var sum=document.getElementById('summary-'+dayId);
+  var btn=document.getElementById('toggle-'+dayId);
+  var isCollapsed=sec.getAttribute('data-collapsed')==='1';
+  if(isCollapsed){
+    sec.setAttribute('data-collapsed','0');
+    if(body) body.style.display='';
+    if(sum) sum.style.display='none';
+    if(btn){ btn.innerHTML='&#9662; hide'; btn.style.color=''; btn.style.borderColor=''; }
+  } else {
+    sec.setAttribute('data-collapsed','1');
+    if(body) body.style.display='none';
+    if(sum){ sum.style.display='block'; updateDaySummary(dayId); }
+    if(btn){ btn.innerHTML='&#9658; show'; btn.style.color='var(--amber)'; btn.style.borderColor='var(--amber)'; }
+  }
+  saveState();
+}
+function updateDaySummary(dayId){
+  var sec=document.getElementById(dayId);
+  var sum=document.getElementById('summary-'+dayId);
+  if(!sum) return;
+  var rem=sec.querySelectorAll('.task-item:not(.is-done),.sched-row:not(.is-done)').length;
+  var done=sec.querySelectorAll('.task-item.is-done,.sched-row.is-done').length;
+  var def=sec.querySelectorAll('.task-item.is-deferred,.sched-row.is-deferred').length;
+  var ov=sec.querySelectorAll('.overdue-item:not(.is-done),.overdue-row:not(.is-done)').length;
+  var parts=[rem+' remaining',done+' done'];
+  if(def) parts.push(def+' deferred');
+  if(ov) parts.push('<span style="color:var(--red)">'+ov+' overdue</span>');
+  sum.innerHTML=parts.join(' · ');
+}
+
+/* ── DATE MANAGEMENT ── */
+var TODAY_ISO='2026-05-07';
+var _dpTarget=null;
+
+function isoToLabel(iso){
+  if(!iso) return '';
+  var d=new Date(iso+'T12:00:00');
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()]+' '+mo[d.getMonth()]+' '+d.getDate();
+}
+function dateStatus(iso){
+  if(!iso) return 'none';
+  if(iso<TODAY_ISO) return 'overdue';
+  if(iso===TODAY_ISO) return 'today';
+  return 'future';
+}
+function openDatePicker(badgeEl){
+  _dpTarget=badgeEl;
+  var row=badgeEl.closest('.sched-row,.task-item');
+  var cur=row?row.getAttribute('data-date'):'';
+  document.getElementById('dp-date').value=cur||'';
+  document.getElementById('dp-target-id').value=row?row.getAttribute('data-id')||'':'';
+  var pre=document.getElementById('dp-presets');
+  pre.innerHTML='';
+  [{l:'Today Thu 5/7',v:'2026-05-07'},{l:'Fri 5/8',v:'2026-05-08'},{l:'Sat 5/9',v:'2026-05-09'},
+   {l:'Sun 5/10',v:'2026-05-10'},{l:'Mon 5/11',v:'2026-05-11'},{l:'Next Fri 5/15',v:'2026-05-15'}
+  ].forEach(function(r){
+    var b=document.createElement('button');
+    b.className='date-preset'; b.textContent=r.l;
+    b.onclick=function(){ document.getElementById('dp-date').value=r.v; saveDateChange(); };
+    pre.appendChild(b);
+  });
+  openModal('modal-date');
+}
+function saveDateChange(){
+  var iso=document.getElementById('dp-date').value;
+  var id=document.getElementById('dp-target-id').value;
+  var row=id?document.querySelector('[data-id="'+id+'"]'):null;
+  if(row){ applyDateToRow(row,iso); if(!row.classList.contains('is-new')) addChangeFlag(row,'edited'); }
+  closeModal('modal-date');
+  refreshOverdue();
+  saveState();
+}
+function clearItemDate(){
+  var id=document.getElementById('dp-target-id').value;
+  var row=id?document.querySelector('[data-id="'+id+'"]'):null;
+  if(row) applyDateToRow(row,'');
+  closeModal('modal-date');
+  refreshOverdue();
+  saveState();
+}
+function applyDateToRow(row,iso){
+  if(iso) row.setAttribute('data-date',iso); else row.removeAttribute('data-date');
+  var badge=row.querySelector('.date-badge:not(.add-date-hint)');
+  if(!iso){
+    if(badge) badge.remove();
+    row.classList.remove('overdue-row','overdue-item');
+    return;
+  }
+  if(!badge){
+    badge=document.createElement('span');
+    badge.className='date-badge';
+    badge.setAttribute('onclick','openDatePicker(this)');
+    var wrap=row.querySelector('.sched-title,.task-wrap');
+    if(wrap) wrap.appendChild(badge);
+  }
+  var st=dateStatus(iso);
+  badge.textContent='['+isoToLabel(iso)+']';
+  badge.className='date-badge'+(st==='overdue'?' overdue':st==='today'?' due-today':' has-date');
+  badge.setAttribute('onclick','openDatePicker(this)');
+  var isTask=row.classList.contains('task-item');
+  row.classList.toggle('overdue-row',!isTask&&st==='overdue');
+  row.classList.toggle('overdue-item',isTask&&st==='overdue');
+}
+function refreshOverdue(){
+  var ov=document.querySelectorAll('.overdue-row:not(.is-done),.overdue-item:not(.is-done)');
+  var b=document.getElementById('overdue-banner');
+  var ct=document.getElementById('overdue-count');
+  var il=document.getElementById('overdue-list-inline');
+  if(!b||!ct) return; /* missing elements - skip gracefully */
+  ct.textContent=ov.length;
+  if(ov.length){
+    b.classList.add('visible');
+    var labels=[];
+    ov.forEach(function(el){ var t=el.querySelector('.sched-title-text,.task-label-text'); if(t) labels.push(t.textContent.trim().slice(0,36)); });
+    if(il) il.textContent=labels.slice(0,3).join(' · ')+(labels.length>3?' …':'');
+  } else { b.classList.remove('visible'); }
+  document.querySelectorAll('.day-section[data-collapsed="1"]').forEach(function(s){
+    updateDaySummary(s.id);
+  });
+}
+function refreshDateAffordances(){
+  if(!editMode) return;
+  document.querySelectorAll('.sched-row,.task-item').forEach(function(row){
+    if(!row.querySelector('.date-badge:not(.add-date-hint)')&&!row.querySelector('.add-date-hint')){
+      var h=document.createElement('span');
+      h.className='date-badge add-date-hint'; h.textContent='+ date';
+      h.setAttribute('onclick','openDatePicker(this)');
+      var w=row.querySelector('.sched-title,.task-wrap'); if(w) w.appendChild(h);
+    }
+  });
+}
+
+/* ── INIT ── */
+(function(){
+  assignIds();
+  var restored=loadState();
+  if(!restored){ document.body.classList.add('show-changes'); }
+  document.querySelectorAll('[data-date]').forEach(function(r){ applyDateToRow(r,r.getAttribute('data-date')); });
+  refreshOverdue();
+  try {
+    var raw=localStorage.getItem(LS_KEY);
+    if(raw){
+      var st=JSON.parse(raw);
+      (st.collapsedDays||[]).forEach(function(id){
+        var sec=document.getElementById(id);
+        if(sec){
+          var body=document.getElementById('body-'+id);
+          var sum=document.getElementById('summary-'+id);
+          var tb=document.getElementById('toggle-'+id);
+          sec.setAttribute('data-collapsed','1');
+          if(body) body.style.display='none';
+          if(sum){ sum.style.display='block'; updateDaySummary(id); }
+          if(tb){ tb.innerHTML='&#9658; show'; tb.style.color='var(--amber)'; tb.style.borderColor='var(--amber)'; }
+        }
+      });
+    }
+  } catch(e){}
+  document.querySelectorAll('.modal-bg').forEach(function(bg){
+    bg.addEventListener('click',function(e){ if(e.target===bg) bg.classList.remove('open'); });
+  });
+  document.querySelectorAll('#ns-dot-grid .dot-option').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('#ns-dot-grid .dot-option').forEach(function(o){o.classList.remove('selected');});
+      opt.classList.add('selected');
+    });
+  });
+  document.querySelectorAll('#nt-tag-grid .tag-option').forEach(function(opt){
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('#nt-tag-grid .tag-option').forEach(function(o){o.classList.remove('selected');});
+      opt.classList.add('selected');
+    });
+  });
+})();
+
+
+/* ── ADD FULL DAY ── */
+function saveNewDay(){
+  var name = document.getElementById('nd-name').value.trim();
+  var meta = document.getElementById('nd-meta').value.trim();
+  var hi   = document.getElementById('nd-highlights').value.trim();
+  if(!name){ document.getElementById('nd-name').focus(); return; }
+
+  var n = Date.now();
+  var dayId     = 'day-new-' + n;
+  var schedId   = 'sched-' + n;
+  var taskListId= 'tasklist-' + n;
+
+  /* --- divider --- */
+  var divider = document.createElement('hr');
+  divider.className = 'day-divider';
+
+  /* --- outer section --- */
+  var sec = document.createElement('div');
+  sec.className = 'day-section';
+  sec.id = dayId;
+
+  /* --- heading --- */
+  var heading = document.createElement('div');
+  heading.className = 'day-heading';
+
+  var nameDiv = document.createElement('div');
+  nameDiv.className = 'day-name';
+  var nameSpan = document.createElement('span');
+  nameSpan.className = 'day-name-text';
+  nameSpan.contentEditable = String(editMode);
+  nameSpan.textContent = name;
+  nameDiv.appendChild(nameSpan);
+  heading.appendChild(nameDiv);
+
+  if(meta){
+    var metaDiv = document.createElement('div');
+    metaDiv.className = 'day-meta';
+    var metaSpan = document.createElement('span');
+    metaSpan.className = 'day-meta-text';
+    metaSpan.contentEditable = String(editMode);
+    metaSpan.textContent = meta;
+    metaDiv.appendChild(metaSpan);
+    heading.appendChild(metaDiv);
+  }
+
+  var toggleBtn = document.createElement('button');
+  toggleBtn.className = 'day-toggle-btn';
+  toggleBtn.id = 'toggle-' + dayId;
+  toggleBtn.innerHTML = '&#9662; hide';
+  toggleBtn.addEventListener('click', function(){ toggleDay(dayId); });
+  heading.appendChild(toggleBtn);
+  sec.appendChild(heading);
+
+  /* --- collapsed summary placeholder --- */
+  var summary = document.createElement('div');
+  summary.className = 'day-collapsed-summary';
+  summary.id = 'summary-' + dayId;
+  summary.style.display = 'none';
+  sec.appendChild(summary);
+
+  /* --- body --- */
+  var body = document.createElement('div');
+  body.className = 'day-body';
+  body.id = 'body-' + dayId;
+
+  var hr = document.createElement('hr');
+  hr.className = 'day-rule';
+  body.appendChild(hr);
+
+  if(hi){
+    var hlDiv = document.createElement('div');
+    hlDiv.className = 'day-highlights';
+    hlDiv.textContent = hi;
+    body.appendChild(hlDiv);
+  }
+
+  /* schedule label */
+  var schedLabel = document.createElement('div');
+  schedLabel.className = 'section-label';
+  schedLabel.textContent = 'Schedule';
+  body.appendChild(schedLabel);
+
+  /* schedule container */
+  var schedDiv = document.createElement('div');
+  schedDiv.className = 'schedule';
+  schedDiv.id = schedId;
+  var addSchedBtn = document.createElement('button');
+  addSchedBtn.className = 'add-row-btn';
+  addSchedBtn.textContent = '+ Add calendar item';
+  if(editMode) addSchedBtn.style.display = 'block';
+  addSchedBtn.addEventListener('click', function(){ openAddSched(schedId); });
+  schedDiv.appendChild(addSchedBtn);
+  body.appendChild(schedDiv);
+
+  /* task section */
+  var taskSec = document.createElement('div');
+  taskSec.className = 'task-section';
+  var taskHdr = document.createElement('div');
+  taskHdr.className = 'task-sec-hdr';
+  taskHdr.innerHTML = '<span class="task-sec-icon">&#9744;</span><span class="task-sec-title">Tasks</span>';
+  var taskList = document.createElement('ul');
+  taskList.className = 'task-list';
+  taskList.id = taskListId;
+  var addTaskBtn = document.createElement('button');
+  addTaskBtn.className = 'add-task-btn';
+  addTaskBtn.textContent = '+ Add task';
+  if(editMode) addTaskBtn.style.display = 'block';
+  addTaskBtn.addEventListener('click', function(){ openAddTask(taskListId, name); });
+  taskSec.appendChild(taskHdr);
+  taskSec.appendChild(taskList);
+  taskSec.appendChild(addTaskBtn);
+  body.appendChild(taskSec);
+
+  /* add section button */
+  var addSecBtn = document.createElement('button');
+  addSecBtn.className = 'add-section-btn';
+  addSecBtn.textContent = '+ Add task section to ' + name;
+  if(editMode) addSecBtn.style.display = 'block';
+  addSecBtn.addEventListener('click', function(){ openAddSection(dayId); });
+  body.appendChild(addSecBtn);
+
+  sec.appendChild(body);
+
+  /* insert before patch panel */
+  var content = document.getElementById('dashboard-content');
+  content.appendChild(divider);
+  content.appendChild(sec);
+
+  assignIds();
+  addChangeFlag(sec, 'new');
+  saveState();
+  closeModal('modal-add-day');
+  document.getElementById('nd-name').value = '';
+  document.getElementById('nd-meta').value = '';
+  document.getElementById('nd-highlights').value = '';
+  setTimeout(function(){ sec.scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+}
+
+
+/* ── PATCH SYSTEM ── */
+function generatePatch(){
+  var ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  var ops = [];
+
+  document.querySelectorAll('[data-id]').forEach(function(row){
+    var id = row.getAttribute('data-id');
+    if(!row.classList.contains('sched-row') && !row.classList.contains('task-item')) return;
+    var titleEl = row.querySelector('.sched-title-text,.task-label-text');
+    var subEl   = row.querySelector('.sched-sub-text');
+    var timeEl  = row.querySelector('.sched-time-text');
+    var tagEl   = row.querySelector('.tag:not(.add-date-hint):not(.changed-flag)');
+    var tagCls  = tagEl ? (Array.from(tagEl.classList).find(function(x){return x.startsWith('tag-')&&x!=='tag';})||'') : '';
+    var ul      = row.closest('ul.task-list');
+    var sc      = row.closest('.schedule');
+    ops.push({
+      id:         id,
+      type:       row.classList.contains('sched-row') ? 'sched' : 'task',
+      status:     row.classList.contains('is-done') ? 'done' : row.classList.contains('is-deferred') ? 'deferred' : 'open',
+      title:      titleEl ? titleEl.textContent.trim() : '',
+      sub:        subEl   ? subEl.textContent.trim()   : '',
+      time:       timeEl  ? timeEl.textContent.trim()  : '',
+      tagCls:     tagCls,
+      tagLbl:     tagEl   ? tagEl.textContent.trim()   : '',
+      date:       row.getAttribute('data-date') || '',
+      isNew:      row.classList.contains('is-new'),
+      isEdit:     row.classList.contains('is-edited'),
+      priority:   !!row.querySelector('.priority'),
+      parentList: ul ? ul.id||'' : '',
+      parentSched:sc ? sc.id||'' : ''
+    });
+  });
+
+  var patch = {
+    ts: ts,
+    ops: ops,
+    deleted: (window._deletedIds || []).slice()
+  };
+
+  /* Emit as a self-contained runner that only uses JSON data - no string-embedded JS */
+  var out = '/* CW18 patch \u2014 generated ' + ts + ' */\n';
+  out += '(function(){\n';
+  out += '  var P=' + JSON.stringify(patch, null, 2) + ';\n';
+  out += '  function qid(id){return document.querySelector("[data-id=\\""+id+"\\"]");}\n';
+  out += '  P.ops.forEach(function(op){\n';
+  out += '    var el=qid(op.id);\n';
+  out += '    if(op.isNew){\n';
+  out += '      if(op.type==="task"&&op.parentList&&typeof buildTaskItem==="function"){\n';
+  out += '        var li=buildTaskItem(op.title,op.priority,op.tagCls,op.tagLbl,"");\n';
+  out += '        li.setAttribute("data-id",op.id);\n';
+  out += '        var lst=document.getElementById(op.parentList);\n';
+  out += '        if(lst){lst.appendChild(li);if(op.date&&typeof applyDateToRow==="function")applyDateToRow(li,op.date);}\n';
+  out += '      } else if(op.type==="sched"&&op.parentSched&&typeof buildSchedRow==="function"){\n';
+  out += '        var row=buildSchedRow(op.time,op.title,op.sub,op.tagCls.replace("tag-",""),"");\n';
+  out += '        row.setAttribute("data-id",op.id);\n';
+  out += '        var sc=document.getElementById(op.parentSched);\n';
+  out += '        if(sc){var ab=sc.querySelector(".add-row-btn");if(ab)sc.insertBefore(row,ab);else sc.appendChild(row);if(op.date&&typeof applyDateToRow==="function")applyDateToRow(row,op.date);}\n';
+  out += '      }\n';
+  out += '    } else {\n';
+  out += '      if(!el) return;\n';
+  out += '      if(op.status!=="open"){\n';
+  out += '        el.classList.remove("is-done","is-deferred");\n';
+  out += '        var c=el.querySelector(".task-check");if(c)c.classList.remove("is-done","is-deferred");\n';
+  out += '        if(op.status==="done"){el.classList.add("is-done");if(c)c.classList.add("is-done");}\n';
+  out += '        if(op.status==="deferred"){el.classList.add("is-deferred");if(c)c.classList.add("is-deferred");}\n';
+  out += '      }\n';
+  out += '      if(op.isEdit){\n';
+  out += '        var tEl=el.querySelector(".sched-title-text,.task-label-text");if(tEl&&op.title)tEl.textContent=op.title;\n';
+  out += '        var sEl=el.querySelector(".sched-sub-text");if(sEl&&op.sub)sEl.textContent=op.sub;\n';
+  out += '        var mEl=el.querySelector(".sched-time-text");if(mEl&&op.time)mEl.textContent=op.time;\n';
+  out += '        var gEl=el.querySelector(".tag:not(.add-date-hint)");if(gEl&&op.tagCls){gEl.className="tag "+op.tagCls;gEl.textContent=op.tagLbl;}\n';
+  out += '      }\n';
+  out += '      if(op.date&&typeof applyDateToRow==="function")applyDateToRow(el,op.date);\n';
+  out += '    }\n';
+  out += '  });\n';
+  out += '  P.deleted.forEach(function(id){var el=qid(id);if(el)el.remove();});\n';
+  out += '  if(typeof refreshOverdue==="function")refreshOverdue();\n';
+  out += '  if(typeof saveState==="function")saveState();\n';
+  out += '  console.log("CW18 patch applied \u2014 "+P.ts);\n';
+  out += '})();';
+
+  var ta = document.getElementById('patch-output');
+  ta.value = out;
+  ta.select();
+  return out;
+}
+
+function copyPatch(){
+  var ta = document.getElementById('patch-output');
+  if(!ta.value || ta.value.trim() === '') generatePatch();
+  ta.select();
+  try {
+    navigator.clipboard.writeText(ta.value).then(function(){
+      showCopyToast();
+    }).catch(function(){
+      document.execCommand('copy');
+      showCopyToast();
+    });
+  } catch(e){
+    document.execCommand('copy');
+    showCopyToast();
+  }
+}
+
+function showCopyToast(){
+  var btn = document.querySelector('.patch-btn.primary');
+  var orig = btn ? btn.innerHTML : '';
+  if(btn){ btn.innerHTML = '&#10003; Copied!'; btn.style.background='var(--teal)'; btn.style.borderColor='var(--teal)'; }
+  setTimeout(function(){
+    if(btn){ btn.innerHTML = orig; btn.style.background=''; btn.style.borderColor=''; }
+  }, 2000);
+}
+
+function toggleImport(){
+  var area = document.getElementById('patch-import-area');
+  area.classList.toggle('open');
+  if(area.classList.contains('open')) document.getElementById('patch-import-input').focus();
+}
+
+function applyImportedPatch(){
+  var script = document.getElementById('patch-import-input').value.trim();
+  if(!script){ alert('Nothing to apply.'); return; }
+  try {
+    eval(script); // eslint-disable-line no-eval
+    document.getElementById('patch-import-area').classList.remove('open');
+    document.getElementById('patch-import-input').value = '';
+    var btn = document.querySelector('.patch-btn.primary');
+    if(btn){ var o=btn.innerHTML; btn.innerHTML='&#10003; Applied!'; btn.style.background='var(--teal)'; btn.style.borderColor='var(--teal)'; setTimeout(function(){ btn.innerHTML=o; btn.style.background=''; btn.style.borderColor=''; },2000); }
+  } catch(e){
+    /* Non-fatal: show inline error without crashing */
+    var errDiv = document.getElementById('patch-error-msg');
+    if(!errDiv){
+      errDiv = document.createElement('div');
+      errDiv.id = 'patch-error-msg';
+      errDiv.style.cssText = 'font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--red);margin-top:8px;padding:6px 10px;background:#fdf0ee;border-radius:4px;border:1px solid #f5c0b8';
+      document.getElementById('patch-import-area').appendChild(errDiv);
+    }
+    errDiv.textContent = '⚠ ' + e.message + ' — patch may have partially applied. Check items manually.';
+  }
+}
+
+/* track deletions for patch export */
+window._deletedIds = [];
+var _origDelRow = delRow;
+delRow = function(btn){
+  var row = btn.closest('.sched-row,.task-item');
+  if(row && row.getAttribute('data-id') && !row.classList.contains('is-new')){
+    window._deletedIds.push(row.getAttribute('data-id'));
+  }
+  _origDelRow(btn);
+};
+
+
+/* ── PASTE IMPORT ── */
+var _parsedItems = [];
+
+function parsePaste(){
+  var raw = document.getElementById('paste-raw').value;
+  if(!raw.trim()){ alert('Nothing to parse.'); return; }
+  _parsedItems = parseRawData(raw);
+  renderPreview(_parsedItems);
+}
+
+function parseRawData(raw){
+  var lines = raw.split('\n');
+  var items = [];
+  var i = 0;
+  while(i < lines.length){
+    var line = lines[i].trim();
+
+    /* Calendar item: bullet line with time range */
+    var isBullet = line.charAt(0) === '•' || (line.charAt(0) === '-' && !/^--/.test(line));
+    if(isBullet && !/^◯/.test(line)){
+      var title = line.replace(/^[•●\-]\s*/, '').replace(/^\([^)]+\)\s*/, '').trim();
+      var timeStr = '', sub = '', dotColor = '';
+      var j = i + 1;
+      while(j < lines.length){
+        var nxt = lines[j].trim();
+        if(nxt === '' || /^[•●◯\-○]/.test(nxt)) break;
+        var dtm = nxt.match(/(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*([\d:]+\s*[AP]M)\s*[~\-]+\s*([\d:]+\s*[AP]M)/i);
+        if(dtm){
+          timeStr = dtm[2].trim().replace(/^0/, '');
+          sub = dtm[2].trim() + '–' + dtm[3].trim();
+        } else if(nxt && !/^\d{5}/.test(nxt) && !dtm){
+          if(sub) sub += ' · ' + nxt.split(',')[0].trim();
+          else if(!timeStr) sub = nxt.split(',')[0].trim();
+        }
+        j++;
+      }
+      var tl = title.toLowerCase();
+      dotColor = /swim|pool|foss/.test(tl) ? 'teal'
+               : /school|eagle|heights|primrose/.test(tl) ? 'blue'
+               : /piano|music|lesson|kramer/.test(tl) ? 'purple'
+               : /pick.?up|drive/.test(tl) ? 'red'
+               : /dinner|breakfast|meal|prep|cook/.test(tl) ? 'amber'
+               : /bedtime|bath|sleep/.test(tl) ? 'blue'
+               : /walk|hailey|dog/.test(tl) ? 'green'
+               : '';
+      if(title){ items.push({kind:'cal', title:title, time:timeStr, sub:sub, dotColor:dotColor, include:true}); }
+      i = j; continue;
+    }
+
+    /* Task: ◯ ○ or [ ] */
+    var isTask = /^[◯○□\[\]]\s/.test(line);
+    if(isTask){
+      var rawTitle = line.replace(/^[◯○□\[\]\s!*]+/, '').replace(/\s*[!*]+\s*$/,'').trim();
+      if(!rawTitle || rawTitle.length < 2){ i++; continue; }
+      var dueStr = '', tagCls = 'tag-other', tagLbl = 'Other';
+      var k = i + 1;
+      while(k < lines.length){
+        var tl2 = lines[k].trim();
+        if(tl2 === '' || /^[\u25ef\u25cb\u2022]/.test(tl2)) break;
+        var due = tl2.match(/Due\s+Date\s*:\s*([A-Za-z]+\s+\d+,?\s*\d{4})/i);
+        if(due){
+          dueStr = due[1];
+          var rest = tl2.slice(tl2.indexOf(due[1]) + due[1].length).replace(/\s+/g,' ').trim();
+          rest = rest.replace(/[\uD800-\uDFFF]|[\u2600-\u27FF]|[\u1F000-\u1FFFF]/gu,'').trim();
+          var tmap = [
+            ['Medical|Vyvanse|Psych|Jaw|TRIA','tag-med','Med'],
+            ['MGIS','tag-mgis','MGIS'],
+            ['Finance|Budget|Credit|FAFSA|Chase','tag-finance','Finance'],
+            ['Routine','tag-routine','Routine'],
+            ['Saoirse|Scout|Eagle Zone|VBS|Piano|School','tag-kids','Kids'],
+            ['Freya|Lochlann','tag-kids','Kids'],
+            ['Summer|Camp|VBS','tag-summer','Summer'],
+            ['Church|Baptism','tag-church','Church'],
+            ['Olympia|Home|Mulch|Vacuum|Sink|Yard|Lights','tag-home','Home'],
+            ['Wellness|Lifetime|Health','tag-other','Wellness'],
+            ['Meghan','tag-other','Other']
+          ];
+          for(var ti=0; ti<tmap.length; ti++){
+            var rx = new RegExp(tmap[ti][0],'i');
+            if(rx.test(rest) || rx.test(rawTitle)){ tagCls=tmap[ti][1]; tagLbl=tmap[ti][2]; break; }
+          }
+          if(/Routine/i.test(rest)){ tagCls='tag-routine'; tagLbl='Routine'; }
+        }
+        if(/#Routine/i.test(tl2)){ tagCls='tag-routine'; tagLbl='Routine'; }
+        k++;
+      }
+      items.push({kind:'task', title:rawTitle, dueStr:dueStr, tagCls:tagCls, tagLbl:tagLbl, include:true});
+      i = k; continue;
+    }
+    i++;
+  }
+  return items;
+}
+
+function renderPreview(items){
+  var list = document.getElementById('preview-list');
+  list.innerHTML = '';
+  items.forEach(function(item, idx){
+    var li = document.createElement('li');
+    li.className = 'preview-item';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = item.include;
+    (function(it){ cb.addEventListener('change', function(){ it.include = cb.checked; updatePasteCount(); }); })(item);
+    /* check if item already exists in the dashboard */
+    var alreadyExists = false;
+    document.querySelectorAll('.sched-title-text,.task-label-text').forEach(function(el){
+      if(el.textContent.trim().toLowerCase() === item.title.toLowerCase()) alreadyExists = true;
+    });
+    if(alreadyExists){ item.include = false; cb.checked = false; }
+    var badge = document.createElement('span');
+    badge.className = 'preview-badge ' + (alreadyExists ? 'badge-skip' : item.kind === 'cal' ? 'badge-cal' : 'badge-task');
+    badge.textContent = alreadyExists ? 'dup' : item.kind === 'cal' ? 'cal' : 'task';
+    if(alreadyExists){
+      var dupNote = document.createElement('span');
+      dupNote.style.cssText = 'font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--muted);margin-left:6px';
+      dupNote.textContent = '(already exists — unchecked)';
+    }
+    var textDiv = document.createElement('div');
+    textDiv.className = 'preview-item-text';
+    var mainLine = document.createElement('strong');
+    mainLine.style.fontWeight = '500';
+    mainLine.textContent = (item.time ? item.time + '  ' : '') + item.title;
+    textDiv.appendChild(mainLine);
+    var subParts = [];
+    if(item.sub) subParts.push(item.sub);
+    if(item.dueStr) subParts.push('due: ' + item.dueStr);
+    if(item.tagLbl) subParts.push(item.tagLbl);
+    if(subParts.length){
+      var subLine = document.createElement('div');
+      subLine.className = 'preview-item-sub';
+      subLine.textContent = subParts.join(' · ');
+      textDiv.appendChild(subLine);
+    }
+    li.appendChild(cb);
+    li.appendChild(badge);
+    li.appendChild(textDiv);
+    if(alreadyExists && typeof dupNote !== 'undefined') li.appendChild(dupNote);
+    list.appendChild(li);
+  });
+  document.getElementById('paste-preview').classList.add('visible');
+  updatePasteCount();
+  /* populate day selector */
+  var sel = document.getElementById('paste-day-target');
+  var existing = Array.from(sel.options).map(function(o){ return o.value; });
+  document.querySelectorAll('.day-section').forEach(function(ds){
+    if(existing.indexOf(ds.id) === -1){
+      var nEl = ds.querySelector('.day-name-text');
+      if(!nEl) return;
+      var opt = document.createElement('option');
+      opt.value = ds.id; opt.textContent = nEl.textContent.trim();
+      sel.appendChild(opt); existing.push(ds.id);
+    }
+  });
+}
+
+function updatePasteCount(){
+  var n = _parsedItems.filter(function(x){ return x.include; }).length;
+  document.getElementById('paste-count').textContent = n + ' item' + (n === 1 ? '' : 's') + ' selected';
+}
+
+function addParsedItems(){
+  var dayVal = document.getElementById('paste-day-target').value;
+  var dayEl = document.getElementById(dayVal);
+  if(!dayEl){ alert('Day not found.'); return; }
+  var schedEl = dayEl.querySelector('.schedule');
+  var schedId = schedEl ? schedEl.id : null;
+  var taskListEl = dayEl.querySelector('.task-list');
+  var taskListId = taskListEl ? taskListEl.id : null;
+  var added = 0, skipped = 0;
+  _parsedItems.forEach(function(item){
+    if(!item.include) return;
+    if(item.kind === 'cal' && schedId){
+      var sc = document.getElementById(schedId);
+      if(!sc) return;
+      /* duplicate check */
+      var dupeFound = false;
+      sc.querySelectorAll('.sched-title-text').forEach(function(el){
+        if(el.textContent.trim().toLowerCase() === item.title.toLowerCase()) dupeFound = true;
+      });
+      if(dupeFound){ skipped++; return; }
+      var row = buildSchedRow(item.time || '', item.title, item.sub || '', item.dotColor || '', '');
+      var ab = sc.querySelector('.add-row-btn');
+      if(ab) sc.insertBefore(row, ab); else sc.appendChild(row);
+      addChangeFlag(row, 'new');
+      added++;
+    } else if(item.kind === 'task'){
+      /* smart section matching */
+      var targetId = taskListId;
+      dayEl.querySelectorAll('.task-section').forEach(function(sec){
+        var hdr = sec.querySelector('.task-sec-title');
+        var ul  = sec.querySelector('.task-list');
+        if(!hdr || !ul) return;
+        var h = hdr.textContent.toLowerCase();
+        var t = item.tagCls;
+        if((t.indexOf('routine') !== -1 && h.indexOf('routine') !== -1) ||
+           (t.indexOf('kids')    !== -1 && (h.indexOf('kid') !== -1 || h.indexOf('sched') !== -1)) ||
+           (t.indexOf('med')     !== -1 && h.indexOf('med') !== -1) ||
+           (t.indexOf('mgis')    !== -1 && h.indexOf('mgis') !== -1) ||
+           (t.indexOf('finance') !== -1 && h.indexOf('financ') !== -1) ||
+           (t.indexOf('home')    !== -1 && h.indexOf('hous') !== -1) ||
+           (t.indexOf('summer')  !== -1 && h.indexOf('summer') !== -1)){
+          targetId = ul.id || targetId;
+        }
+      });
+      var lst = document.getElementById(targetId);
+      if(!lst) return;
+      /* duplicate check */
+      var taskDupe = false;
+      lst.querySelectorAll('.task-label-text').forEach(function(el){
+        if(el.textContent.trim().toLowerCase() === item.title.toLowerCase()) taskDupe = true;
+      });
+      if(taskDupe){ skipped++; return; }
+      var li = buildTaskItem(item.title, false, item.tagCls, item.tagLbl, '');
+      lst.appendChild(li);
+      addChangeFlag(li, 'new');
+      added++;
+    }
+  });
+  assignIds();
+  saveState();
+  var btn = document.getElementById('paste-add-btn');
+  btn.textContent = '✓ ' + added + ' added' + (skipped > 0 ? ' · ' + skipped + ' duplicate' + (skipped===1?'':'s') + ' skipped' : '');
+  btn.style.background = skipped > 0 ? 'var(--amber)' : 'var(--teal)';
+  btn.style.borderColor = skipped > 0 ? 'var(--amber)' : 'var(--teal)';
+  setTimeout(function(){ btn.textContent = '+ Add checked items'; btn.style.background = ''; btn.style.borderColor = ''; }, 3000);
+  _parsedItems = _parsedItems.filter(function(x){ return !x.include; });
+  if(!_parsedItems.length){ document.getElementById('paste-preview').classList.remove('visible'); document.getElementById('paste-raw').value = ''; }
+  else renderPreview(_parsedItems);
+}
+
+function clearPaste(){
+  document.getElementById('paste-raw').value = '';
+  document.getElementById('paste-preview').classList.remove('visible');
+  _parsedItems = [];
+}
+
+
+/* -- HIGHLIGHT EDIT -- */
+function onHighlightEdit(){ saveState(); }
+
+/* -- WEATHER REFRESH via Open-Meteo (free, no key) -- */
+function refreshWeather(){
+  var btn = document.getElementById('wx-refresh-btn');
+  if(btn){ btn.textContent = '...'; btn.style.color='var(--amber)'; }
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=44.8547&longitude=-93.4708'
+    + '&current=temperature_2m,weathercode'
+    + '&daily=temperature_2m_max,precipitation_probability_max,weathercode'
+    + '&temperature_unit=fahrenheit&timezone=America%2FChicago&forecast_days=5';
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var cur = d.current, daily = d.daily;
+      var el, t;
+      /* current */
+      el = document.getElementById('wx-now-temp'); if(el) el.textContent = Math.round(cur.temperature_2m) + '\u00b0';
+      el = document.getElementById('wx-now-icon'); if(el) el.textContent = wxIcon(cur.weathercode);
+      el = document.getElementById('wx-condition'); if(el) el.textContent = wxText(cur.weathercode);
+      /* CT timestamp */
+      var ct = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/Chicago'});
+      el = document.getElementById('wx-updated'); if(el) el.textContent = 'Updated ' + ct + ' CT';
+      /* forecast */
+      var ids = ['thu','fri','sat','sun','mon'];
+      var dnames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      for(var i=0;i<5&&i<daily.time.length;i++){
+        var d2 = new Date(daily.time[i]+'T12:00:00');
+        var nd = document.getElementById('wx-'+ids[i]+'-name'); if(nd) nd.textContent = dnames[d2.getDay()];
+        var ic = document.getElementById('wx-'+ids[i]+'-icon'); if(ic) ic.textContent = wxIcon(daily.weathercode[i]);
+        var hi = document.getElementById('wx-'+ids[i]+'-hi');   if(hi) hi.textContent = Math.round(daily.temperature_2m_max[i])+'\u00b0';
+        var pr = document.getElementById('wx-'+ids[i]+'-prec'); if(pr) pr.textContent = (daily.precipitation_probability_max[i]||0)+'%';
+      }
+      if(btn){ btn.textContent = '\u2713 done'; btn.style.color='var(--teal)'; btn.style.borderColor='var(--teal)'; setTimeout(function(){ btn.textContent='\u27f3 Refresh'; btn.style.color=''; btn.style.borderColor=''; },2000); }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent = 'failed'; btn.style.color='var(--red)'; setTimeout(function(){ btn.textContent='\u27f3 Refresh'; btn.style.color=''; },2500); }
+    });
+}
+function wxText(c){
+  if(c===0)return'Clear';if(c<=2)return'Partly cloudy';if(c===3)return'Overcast';
+  if(c<=49)return'Foggy';if(c<=59)return'Drizzle';if(c<=69)return'Rain';
+  if(c<=79)return'Snow';if(c<=84)return'Showers';if(c<=94)return'Thunderstorms';return'Stormy';
+}
+function wxIcon(c){
+  if(c===0)return'\u2600\ufe0f';if(c<=2)return'\u26c5';if(c===3)return'\u2601\ufe0f';
+  if(c<=49)return'\uD83C\uDF2B';if(c<=59)return'\uD83C\uDF26';if(c<=69)return'\uD83C\uDF27';
+  if(c<=79)return'\u2744\ufe0f';if(c<=84)return'\uD83C\uDF26';return'\u26c8\ufe0f';
+}
+
+</script>
+
+<!-- Date Picker Modal -->
+<div class="modal-bg" id="modal-date">
+  <div class="modal" style="max-width:340px">
+    <h3>Change date</h3>
+    <label>Scheduled date</label>
+    <input type="date" id="dp-date" style="width:100%;padding:7px 10px;border:1px solid var(--rule);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px">
+    <label>Quick pick</label>
+    <div class="date-presets" id="dp-presets"></div>
+    <div style="margin-top:12px">
+      <button class="date-preset" onclick="clearItemDate()" style="border-color:var(--red);color:var(--red)">x Remove date</button>
+    </div>
+    <input type="hidden" id="dp-target-id">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-date')">Cancel</button>
+      <button class="btn-save" onclick="saveDateChange()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Day Modal -->
+<div class="modal-bg" id="modal-add-day">
+  <div class="modal">
+    <h3>Add a day</h3>
+    <label>Day name</label>
+    <input type="text" id="nd-name" placeholder="e.g. Saturday">
+    <label>Date / meta line</label>
+    <input type="text" id="nd-meta" placeholder="e.g. May 9, 2026">
+    <label>Highlights (optional)</label>
+    <input type="text" id="nd-highlights" placeholder="e.g. 🎂 Cecelia birthday party 5pm">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('modal-add-day')">Cancel</button>
+      <button class="btn-save" onclick="saveNewDay()">Add day</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
